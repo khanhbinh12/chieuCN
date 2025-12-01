@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký - Time Tracking App</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-form">
+            <h1>Time Tracking</h1>
+            <h2>Đăng ký tài khoản mới</h2>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="reg_username">Tên đăng nhập:</label>
+                    <input type="text" id="reg_username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_email">Email:</label>
+                    <input type="email" id="reg_email" name="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg_fullname">Họ tên:</label>
+                    <input type="text" id="reg_fullname" name="fullName">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg_password">Mật khẩu:</label>
+                    <input type="password" id="reg_password" name="password" required>
+                </div>
+                
+                <button type="submit" id="registerBtn" class="btn btn-primary" style="width: 100%;">Đăng ký</button>
+            </form>
+            
+            <p style="margin-top: 15px; text-align: center;">
+                Đã có tài khoản? <a href="login.html" style="color: #3498db; text-decoration: none;">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+    
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
