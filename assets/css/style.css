@@ -1,0 +1,55 @@
+/* --- Base Styles (Từ Buổi 7) --- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.6; }
+.hidden { display: none !important; }
+
+/* Buttons */
+.btn { padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; color: white; transition: 0.3s; }
+.btn-primary { background-color: #3498db; }
+.btn-primary:hover { background-color: #2980b9; }
+.btn-danger { background-color: #e74c3c; }
+.btn-outline { background-color: transparent; border: 1px solid #3498db; color: #3498db; }
+.btn-outline:hover { background-color: #3498db; color: white; }
+
+/* Forms & Auth */
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.login-container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+
+/* Header */
+.header { background-color: #2c3e50; color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.header-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+.main-content { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Board Controls */
+.board-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.board-selector select { padding: 8px; border-radius: 4px; border: 1px solid #ddd; min-width: 200px; }
+
+/* --- TIME TRACKING STYLES (Mới) --- */
+.kanban-board { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.board-actions { display: flex; gap: 10px; align-items: center; }
+
+.task-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.task-table th, .task-table td { padding: 12px 15px; border-bottom: 1px solid #eee; text-align: left; }
+.task-table th { background-color: #f8f9fa; font-weight: 600; color: #2c3e50; }
+.task-row:hover { background-color: #f1f2f6; }
+
+/* Nút Play/Stop tròn */
+.btn-icon { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 5px; transition: 0.2s; }
+.btn-play { background-color: #2ecc71; color: white; }
+.btn-play:hover { background-color: #27ae60; }
+.btn-stop { background-color: #e74c3c; color: white; animation: pulse 1.5s infinite; }
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+/* Modal */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
+.close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }

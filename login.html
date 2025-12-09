@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Time Tracking App</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-form">
+            <h1>Time Tracking</h1>
+            <h2>Đăng nhập hệ thống</h2>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập:</label>
+                    <input type="text" id="username" name="username" placeholder="Nhập username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mật khẩu:</label>
+                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="btn btn-primary" style="width: 100%;">Đăng nhập</button>
+            </form>
+            
+            <p style="margin-top: 15px; text-align: center;">
+                Chưa có tài khoản? <a href="register.html" style="color: #3498db; text-decoration: none;">Đăng ký ngay</a>
+            </p>
+            
+            <div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 0.9em; color: #666;">
+                <strong>Tài khoản demo:</strong><br>
+                User: <code>kbinh</code> / Pass: <code>kbinh</code>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

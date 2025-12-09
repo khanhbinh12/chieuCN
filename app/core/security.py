@@ -1,96 +1,23 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union, Any
-
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from fastapi import HTTPException, status
-
 from app.core.config import settings
 
-# Context để hash/verify password bằng bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Thuật toán dùng cho JWT
-ALGORITHM = "HS256"
-
-# Thời gian sống của access token (phút)
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
-
-
-def create_access_token(
-    subject: Union[str, Any],
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    Tạo JWT access token.
-
-    - subject: thường là user_id (hoặc string bất kỳ) -> sẽ đưa vào claim 'sub'
-    - expires_delta: nếu truyền vào thì dùng, không thì lấy ACCESS_TOKEN_EXPIRE_MINUTES từ settings
-    """
-    if expires_delta is not None:
+def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
 
-    to_encode = {
-        "exp": expire,
-        "sub": str(subject),  # Thêm user_id vào claim 'sub'
-    }
-
-    encoded_jwt = jwt.encode(
-        to_encode,
-        settings.secret_key,  # Lấy secret_key từ settings
-        algorithm=ALGORITHM,
-    )
+    to_encode = {"exp": expire, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
     return encoded_jwt
 
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    So sánh password người dùng nhập với password đã hash trong DB.
-    """
-    # Truncate mật khẩu nếu cần thiết (cắt bỏ mật khẩu dài hơn 72 ký tự)
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password[:72]
-    
     return pwd_context.verify(plain_password, hashed_password)
 
-
 def get_password_hash(password: str) -> str:
-    """
-    Hash password trước khi lưu vào DB.
-    """
-    # Truncate mật khẩu nếu nó dài hơn 72 byte
-    if len(password.encode('utf-8')) > 72:
-        password = password[:72]
-
     return pwd_context.hash(password)
-
-
-def decode_access_token(token: str) -> dict:
-    """
-    Giải mã access token. Ném JWTError nếu token không hợp lệ hoặc hết hạn.
-    Dùng trong get_current_user hoặc chỗ nào cần đọc payload.
-    """
-    try:
-        # Giải mã token
-        payload = jwt.decode(
-            token,
-            settings.secret_key,  # Sử dụng secret_key từ config
-            algorithms=[ALGORITHM],
-        )
-
-        # Kiểm tra token đã hết hạn hay chưa
-        if "exp" in payload and datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired.",
-            )
-
-        return payload
-    except JWTError:
-        # Nếu token không hợp lệ hoặc hết hạn
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không hợp lệ hoặc đã hết hạn.",
-        )

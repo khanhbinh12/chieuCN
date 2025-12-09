@@ -1,30 +1,18 @@
-# app/database/connection.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.core.config import settings  # import Settings ở trên
+# Import biến 'settings' đã được khởi tạo bên app/core/config.py
+from app.core.config import settings
 
+# Tạo engine kết nối từ URL trong settings
+engine = create_engine(settings.database_url, pool_pre_ping=True)
 
-# Nếu dùng field là `database_url`
-SQLALCHEMY_DATABASE_URL = settings.database_url
-# Nếu bạn dùng field UPPERCASE:
-# SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+# Cấu hình session
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    echo=False,      # bật True nếu muốn xem log SQL
-    future=True,
-)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-)
-
+# Khởi tạo Base model
 Base = declarative_base()
 
-
-# Dependency cho FastAPI
+# Dependency dùng cho API
 def get_db():
     db = SessionLocal()
     try:

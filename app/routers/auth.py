@@ -1,57 +1,42 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-
 from app.database.connection import get_db
+# Lưu ý: Import models từ app.database.models chứ không phải app.database
+from app.database.models import User
 from app.database.repository import user_repo
-from app.schemas.user import UserCreate, UserResponse  # Thay UserOut thành UserResponse
+from app.schemas.user import UserCreate, UserResponse, Token
+from app.core.security import verify_password, create_access_token
 
-from app.core.security import create_access_token, verify_password
+# Khởi tạo router
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-router = APIRouter(
-    prefix="/auth",
-    tags=["auth"],
-)
-
-@router.post("/register", response_model=UserResponse)  # Đổi từ UserOut thành UserResponse
+@router.post("/register", response_model=UserResponse)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    # Kiểm tra username trùng
+    # 1. Kiểm tra username đã tồn tại chưa
     if user_repo.get_by_username(db, username=user_in.username):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
+            status_code=400, 
+            detail="Username already registered"
         )
-
-    # Tạo user mới
+    
+    # 2. Tạo user
     user = user_repo.create_user(db, user_in.dict())
     return user
 
-
-@router.post("/login")
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
-):
-    # Lấy user theo username
+@router.post("/login", response_model=Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # 1. Tìm user trong DB
     user = user_repo.get_by_username(db, username=form_data.username)
-
-    # ⚠️ Dùng đúng field hashed_password
-    if not user or not verify_password(form_data.password, user.hashed_password):  # Xác minh hashed_password
+    
+    # 2. Kiểm tra password
+    if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
-
-    # Tạo access token
-    access_token = create_access_token(user.id)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "full_name": user.full_name,
-        },
-    }
+    
+    # 3. Tạo token
+    access_token = create_access_token(subject=user.id)
+    return {"access_token": access_token, "token_type": "bearer"}
