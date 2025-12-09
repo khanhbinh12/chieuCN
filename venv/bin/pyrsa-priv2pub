@@ -1,4 +1,4 @@
-#!/home/kbinh/chieuCN/time-tracking-app/venv/bin/python
+#!/home/kbinh/chieuCN/time-tracking-app/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

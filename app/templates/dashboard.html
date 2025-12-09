@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Quản Lý Dự Án</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+    <header class="header">
+        <h1>⏱️ Dashboard - Quản Lý Dự Án</h1>
+    </header>
+
+    <main class="main-content">
+        <h2>Chọn Dự Án Để Quản Lý</h2>
+        <div class="board-controls">
+            <div class="board-selector">
+                <label for="boardSelect" style="font-weight: bold; margin-right: 10px;">Dự án hiện tại:</label>
+                <select id="boardSelect">
+                    <option value="">Đang tải danh sách...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Hiển thị thông tin dự án -->
+        <div id="kanbanBoard" class="kanban-board">
+            <h3 id="boardTitle">Tên Dự Án</h3>
+            <div class="task-list-container">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Tên công việc</th>
+                            <th style="width: 15%;">Trạng thái</th>
+                            <th style="width: 20%;">Tổng thời gian</th>
+                            <th style="width: 25%; text-align: right;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskListBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/api.js"></script>
+    <script>
+        // Lấy danh sách dự án
+        async function loadProjects() {
+            try {
+                const projects = await api.getProjects();
+                const boardSelect = document.getElementById("boardSelect");
+                boardSelect.innerHTML = '<option value="">-- Chọn Dự Án --</option>';
+                if (projects && projects.length > 0) {
+                    projects.forEach(project => {
+                        const option = document.createElement("option");
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        boardSelect.appendChild(option);
+                    });
+                } else {
+                    alert("Không có dự án nào!");
+                }
+            } catch (error) {
+                console.error("Không thể tải danh sách dự án:", error);
+            }
+        }
+
+        // Khi chọn dự án, hiển thị các công việc
+        document.getElementById('boardSelect').addEventListener('change', async function (e) {
+            const projectId = e.target.value;
+            if (projectId) {
+                await loadTasks(projectId);
+            }
+        });
+
+        // Load tasks cho dự án
+        async function loadTasks(projectId) {
+            try {
+                const tasks = await api.getTasks(projectId);
+                const taskListBody = document.getElementById("taskListBody");
+                taskListBody.innerHTML = "";
+
+                if (tasks && tasks.length > 0) {
+                    tasks.forEach(task => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${task.title}</td>
+                            <td>${task.status}</td>
+                            <td>${formatTime(task.total_time)}</td>
+                            <td style="text-align: right;">
+                                <button class="btn btn-primary">Xem chi tiết</button>
+                            </td>
+                        `;
+                        taskListBody.appendChild(tr);
+                    });
+                } else {
+                    taskListBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding: 20px;">Chưa có công việc nào.</td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Không thể tải danh sách công việc:", error);
+            }
+        }
+
+        // Chuyển đổi thời gian từ giây sang định dạng HH:MM:SS
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const sec = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // Gọi loadProjects khi trang được tải
+        document.addEventListener('DOMContentLoaded', loadProjects);
+    </script>
+</body>
+</html>

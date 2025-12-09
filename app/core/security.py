@@ -3,6 +3,7 @@ from typing import Optional, Union, Any
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from fastapi import HTTPException, status
 
 from app.core.config import settings
 
@@ -48,6 +49,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     So sánh password người dùng nhập với password đã hash trong DB.
     """
+    # Truncate mật khẩu nếu cần thiết (cắt bỏ mật khẩu dài hơn 72 ký tự)
+    if len(plain_password.encode('utf-8')) > 72:
+        plain_password = plain_password[:72]
+    
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -55,6 +60,10 @@ def get_password_hash(password: str) -> str:
     """
     Hash password trước khi lưu vào DB.
     """
+    # Truncate mật khẩu nếu nó dài hơn 72 byte
+    if len(password.encode('utf-8')) > 72:
+        password = password[:72]
+
     return pwd_context.hash(password)
 
 
@@ -70,8 +79,16 @@ def decode_access_token(token: str) -> dict:
             settings.secret_key,  # Sử dụng secret_key từ config
             algorithms=[ALGORITHM],
         )
+
+        # Kiểm tra token đã hết hạn hay chưa
+        if "exp" in payload and datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired.",
+            )
+
         return payload
-    except JWTError as e:
+    except JWTError:
         # Nếu token không hợp lệ hoặc hết hạn
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
