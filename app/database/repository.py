@@ -6,9 +6,14 @@ from app.core.security import get_password_hash
 # --- 1. User Repository ---
 class UserRepository:
     def get_by_username(self, db: Session, username: str):
+        """Lấy người dùng từ cơ sở dữ liệu theo tên người dùng"""
         return db.query(User).filter(User.username == username).first()
 
     def create_user(self, db: Session, user_data: dict):
+        """
+        Tạo người dùng mới.
+        - Lấy mật khẩu từ `user_data`, băm mật khẩu và lưu vào cơ sở dữ liệu.
+        """
         password = user_data.pop("password")
         hashed_password = get_password_hash(password)
         db_user = User(**user_data, password_hash=hashed_password)
@@ -21,6 +26,9 @@ class UserRepository:
 # --- 2. Project Repository ---
 class ProjectRepository:
     def create_project(self, db: Session, project_data: dict):
+        """
+        Tạo project mới và lưu vào cơ sở dữ liệu.
+        """
         new_project = Project(**project_data)
         db.add(new_project)
         db.commit()
@@ -28,14 +36,23 @@ class ProjectRepository:
         return new_project
 
     def get_my_projects(self, db: Session, user_id: int):
+        """
+        Lấy tất cả các project của người dùng (tức là các project mà người dùng sở hữu).
+        """
         return db.query(Project).filter(Project.owner_id == user_id).all()
 
     def get_project_by_id(self, db: Session, project_id: int):
+        """
+        Lấy project theo ID.
+        """
         return db.query(Project).filter(Project.id == project_id).first()
 
 # --- 3. Task Repository ---
 class TaskRepository:
     def create_task(self, db: Session, task_data: dict):
+        """
+        Tạo task mới và lưu vào cơ sở dữ liệu.
+        """
         new_task = Task(**task_data)
         db.add(new_task)
         db.commit()
@@ -43,19 +60,26 @@ class TaskRepository:
         return new_task
 
     def get_my_tasks(self, db: Session, user_id: int, project_id: int = None):
-        # Join bảng Task với Project để chỉ lấy task thuộc về project của user đó
+        """
+        Lấy tất cả các task của người dùng, có thể lọc theo project_id.
+        """
         query = db.query(Task).join(Project).filter(Project.owner_id == user_id)
         if project_id:
             query = query.filter(Task.project_id == project_id)
         return query.all()
     
     def get_task_by_id(self, db: Session, task_id: int):
+        """
+        Lấy task theo ID.
+        """
         return db.query(Task).filter(Task.id == task_id).first()
 
 # --- 4. Time Repository (Logic Bấm giờ) ---
 class TimeRepository:
     def start_timer(self, db: Session, user_id: int, task_id: int, note: str = None):
-        """Bắt đầu tính giờ. Tự động dừng timer cũ nếu đang chạy."""
+        """
+        Bắt đầu tính giờ. Tự động dừng timer cũ nếu đang chạy.
+        """
         # 1. Tìm timer đang chạy (end_time là Null)
         running_entry = db.query(TimeEntry).filter(
             TimeEntry.user_id == user_id,
@@ -79,7 +103,9 @@ class TimeRepository:
         return new_entry
 
     def stop_timer(self, db: Session, user_id: int):
-        """Dừng timer và tính toán thời gian."""
+        """
+        Dừng timer và tính toán thời gian.
+        """
         # 1. Tìm entry đang chạy
         entry = db.query(TimeEntry).filter(
             TimeEntry.user_id == user_id,
@@ -105,7 +131,7 @@ class TimeRepository:
         db.refresh(entry)
         return entry
 
-# Khởi tạo instance
+# Khởi tạo instance của các repository
 user_repo = UserRepository()
 project_repo = ProjectRepository()
 task_repo = TaskRepository()
