@@ -1,67 +1,126 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Time Tracking App</title>
-    <!-- Link CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+
+    <link rel="stylesheet" href="assets/css/style.css" />
+
+    <!-- Toastify CSS để thông báo đẹp hơn -->
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
 </head>
 <body>
-    <!-- 1. Header -->
     <header class="header">
         <div class="header-content">
             <h1>⏱️ Time Tracking App</h1>
             <div class="user-info">
                 <span>Xin chào, <strong id="currentUser">User</strong></span>
-                <button id="logoutBtn" class="btn btn-outline" style="border-color: white; color: white;">Đăng xuất</button>
+                <button
+                    id="logoutBtn"
+                    class="btn btn-outline"
+                    style="border-color: white; color: white;"
+                >
+                    Đăng xuất
+                </button>
             </div>
         </div>
     </header>
-    
-    <!-- 2. Main Content -->
+
     <main class="main-content">
-        
-        <!-- Chọn Project -->
+        <!-- Chọn dự án -->
         <div class="board-controls">
             <div class="board-selector">
-                <label for="boardSelect" style="font-weight: bold; margin-right: 10px;">Dự án hiện tại:</label>
+                <label
+                    for="boardSelect"
+                    style="font-weight: bold; margin-right: 10px;"
+                >
+                    Dự án hiện tại:
+                </label>
                 <select id="boardSelect">
                     <option value="">Đang tải danh sách...</option>
                 </select>
             </div>
-            <!-- (Optional) Nút tạo Project mới có thể thêm ở đây -->
+            <!-- Nút tạo dự án mới -->
+            <button id="createProjectBtn" class="btn btn-primary">
+                + Tạo Dự Án Mới
+            </button>
         </div>
-        
-        <!-- Màn hình chờ (Empty State) -->
-        <div id="emptyState" class="empty-state hidden" style="text-align: center; padding: 50px; background: white; border-radius: 8px;">
+
+        <!-- Trạng thái khi chưa chọn dự án -->
+        <div
+            id="emptyState"
+            class="empty-state"
+            style="text-align: center; padding: 50px; background: white; border-radius: 8px;"
+        >
             <h2 style="color: #7f8c8d;">Chưa chọn dự án nào</h2>
-            <p>Vui lòng chọn một dự án từ danh sách phía trên để bắt đầu theo dõi thời gian.</p>
+            <p>Vui lòng chọn một dự án từ danh sách phía trên để bắt đầu.</p>
         </div>
-        
-        <!-- Giao diện chính (Time Tracking Dashboard) -->
+
+        <!-- Board chính -->
         <div id="kanbanBoard" class="kanban-board hidden">
             <div class="board-header">
                 <div>
-                    <h2 id="boardTitle" style="margin: 0; color: #2c3e50;">Tên Dự Án</h2>
-                    <small style="color: #7f8c8d;">Quản lý công việc và thời gian</small>
+                    <h2
+                        id="boardTitle"
+                        style="margin: 0; color: #2c3e50;"
+                    >
+                        Tên Dự Án
+                    </h2>
+                    <small style="color: #7f8c8d;">Quản lý công việc</small>
                 </div>
-                
+
                 <div class="board-actions">
-                    <!-- Đồng hồ tổng (Global Timer) -->
-                    <div id="globalTimer" class="global-timer hidden" style="background: #2c3e50; color: white; padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                    <!-- Đồng hồ tổng -->
+                    <div
+                        id="globalTimer"
+                        class="global-timer hidden"
+                        style="
+                            background: #2c3e50;
+                            color: white;
+                            padding: 8px 15px;
+                            border-radius: 4px;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        "
+                    >
                         <span class="timer-icon">⏱️</span>
-                        <span id="timerDisplay" style="font-family: 'Courier New', monospace; font-size: 1.4rem; font-weight: bold;">00:00:00</span>
+                        <span
+                            id="timerDisplay"
+                            style="font-family: monospace; font-size: 1.4rem; font-weight: bold;"
+                        >
+                            00:00:00
+                        </span>
                     </div>
-                    
-                    <!-- Nút tạo task -->
-                    <button id="createTaskBtn" class="btn btn-primary" onclick="app.showNewTaskModal()">
+
+                    <!-- Nút tạo task mới -->
+                    <button
+                        id="createTaskBtn"
+                        type="button"
+                        class="btn btn-primary"
+                        onclick="app.showNewTaskModal()"
+                    >
                         + Thêm công việc
                     </button>
                 </div>
             </div>
 
-            <!-- Bảng danh sách công việc -->
+            <!-- PHẦN THỐNG KÊ (sẽ dùng Chart.js sau này) -->
+            <div class="stats-container" style="margin-bottom: 30px; display: flex; gap: 20px;">
+                <div
+                    style="flex: 1; background: #f8f9fa; padding: 20px; border-radius: 8px;"
+                >
+                    <h3>📊 Thống kê thời gian (giây)</h3>
+                    <canvas id="timeChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Danh sách task -->
             <div class="task-list-container">
                 <table class="task-table">
                     <thead>
@@ -72,44 +131,39 @@
                             <th style="width: 25%; text-align: right;">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody id="taskListBody">
-                        <!-- Task items sẽ được JavaScript render vào đây -->
-                    </tbody>
+                    <tbody id="taskListBody"></tbody>
                 </table>
             </div>
         </div>
     </main>
-    
-    <!-- 3. Modals (Popup) -->
-    
-    <!-- Modal Tạo Task Mới -->
-    <div id="taskModal" class="modal hidden">
+
+    <!-- Modal Tạo Dự Án -->
+    <div id="projectModal" class="modal hidden">
         <div class="modal-content">
-            <span class="close" onclick="app.closeTaskModal()">&times;</span>
-            <h2>Thêm công việc mới</h2>
-            
-            <form id="taskForm">
+            <span class="close" onclick="app.closeProjectModal()">&times;</span>
+            <h2>Thêm Dự Án Mới</h2>
+            <form id="projectForm">
                 <div class="form-group">
-                    <label for="taskTitle">Tên công việc <span style="color: red">*</span></label>
-                    <input type="text" id="taskTitle" required placeholder="Ví dụ: Thiết kế giao diện...">
+                    <label>Tên Dự Án <span style="color: red">*</span></label>
+                    <input type="text" id="projectName" required placeholder="Tên dự án..." />
                 </div>
-                
                 <div class="form-group">
-                    <label for="taskDescription">Mô tả (Tùy chọn)</label>
-                    <textarea id="taskDescription" rows="3" placeholder="Chi tiết công việc..."></textarea>
+                    <label>Mô Tả</label>
+                    <textarea id="projectDescription" rows="3" placeholder="Mô tả dự án..."></textarea>
                 </div>
-                
                 <div class="form-actions" style="text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeTaskModal()" style="margin-right: 10px;">Hủy bỏ</button>
-                    <button type="submit" class="btn btn-primary">Tạo mới</button>
+                    <button type="button" class="btn btn-secondary" onclick="app.closeProjectModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo Dự Án</button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <!-- 4. Scripts -->
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
-</html>   
+</html>

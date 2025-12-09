@@ -1,67 +1,72 @@
-import sys
 import os
+import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # ===============================================================
-# 1. CẤU HÌNH ĐƯỜNG DẪN (QUAN TRỌNG NHẤT)
+# 1. CẤU HÌNH ĐƯỜNG DẪN ĐẾN PROJECT ROOT
 # ===============================================================
-# Lấy đường dẫn của file env.py hiện tại
+
+# Đường dẫn thư mục chứa file env.py (migrations/)
 current_path = os.path.dirname(os.path.abspath(__file__))
-# Lấy đường dẫn thư mục gốc dự án (thư mục cha của migrations)
-root_path = os.path.abspath(os.path.join(current_path, '..'))
 
-# In ra để debug xem nó đang trỏ đi đâu
-print(f"-------- DEBUG PATH --------")
-print(f"Root Project Path: {root_path}")
+# Thư mục gốc project (cha của migrations/) – nơi chứa thư mục app/
+root_path = os.path.abspath(os.path.join(current_path, ".."))
 
-# Thêm đường dẫn gốc vào VỊ TRÍ ĐẦU TIÊN của hệ thống
-# Để Python ưu tiên tìm package 'app' trong thư mục này
-sys.path.insert(0, root_path)
-print(f"Sys Path[0]: {sys.path[0]}")
-print(f"--------------------------")
+# Thêm root_path vào PYTHONPATH để import được package "app"
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
 
 # ===============================================================
-# 2. IMPORT TỪ APP (Chỉ import SAU KHI đã fix đường dẫn)
+# 2. IMPORT TỪ APP SAU KHI ĐÃ FIX ĐƯỜNG DẪN
 # ===============================================================
+
 try:
+    # Config (lấy database_url, secret_key, ...)
     from app.core.config import settings
-    
-    # 1. Import Base từ nơi khai báo gốc (connection.py)
+
+    # Base: nơi khai báo declarative_base()
     from app.database.connection import Base
-    
-    # 2. Import module models để đảm bảo các class (User, Task...) được đăng ký vào Base
-    # Nếu thiếu dòng này, Alembic sẽ không tìm thấy bảng nào để tạo
-    from app.database import models
-    
-    print("✅ Import thành công: settings, Base và models")
+
+    # Import models để Alembic biết metadata có những bảng nào
+    from app.database import models  # noqa: F401
+
+    print("✅ Alembic: Import settings, Base, models thành công.")
 except ImportError as e:
-    print("❌ LỖI IMPORT: Không tìm thấy module.")
-    print(e)
-    print("👉 Hãy kiểm tra lại cấu trúc thư mục và file __init__.py")
+    print("❌ Alembic: Lỗi import module từ app.")
+    print("   Hãy kiểm tra lại cấu trúc thư mục và file __init__.py.")
     raise e
 
-# ---------------------------------------------------------------
-# Config Alembic (Giữ nguyên logic chuẩn)
-# ---------------------------------------------------------------
+# ===============================================================
+# 3. CẤU HÌNH ALEMBIC CONFIG
+# ===============================================================
+
 config = context.config
 
-# Ghi đè URL database bằng cấu hình từ file config.py (lấy từ .env)
+# Ghi đè URL database bằng cấu hình từ Settings (lấy từ .env hoặc default)
+# Lưu ý: dùng đúng tên field trong Settings (database_url hoặc DATABASE_URL)
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
+# Nếu có file alembic.ini thì load config logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Gán metadata để tính năng autogenerate hoạt động
+# Gắn metadata để tính năng autogenerate làm việc được
 target_metadata = Base.metadata
 
+
+# ===============================================================
+# 4. HÀM CHẠY MIGRATION OFFLINE
+# ===============================================================
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
+    """
+    Chạy migrations ở chế độ 'offline'.
+    Alembic sẽ sinh câu lệnh SQL dựa trên URL, không cần kết nối DB thật.
+    """
     url = config.get_main_option("sqlalchemy.url")
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -72,22 +77,34 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
+# ===============================================================
+# 5. HÀM CHẠY MIGRATION ONLINE
+# ===============================================================
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
+    """
+    Chạy migrations ở chế độ 'online'.
+    Alembic sẽ tạo engine và kết nối tới DB rồi apply migration.
+    """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        config.get_section(config.config_ini_section) or {},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
+
+# ===============================================================
+# 6. CHỌN CHẾ ĐỘ CHẠY
+# ===============================================================
 if context.is_offline_mode():
     run_migrations_offline()
 else:
