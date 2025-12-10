@@ -30,17 +30,18 @@ class APIClient {
             const response = await fetch(url, config);
             if (!response.ok) {
                 if (response.status === 401) {
+                    // Xóa token và thông tin người dùng khi hết hạn token
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('user_info');
-                    window.location.href = '/static/login.html';
+                    window.location.href = '/static/login.html';  // Điều hướng về trang đăng nhập
                 }
                 throw new Error(`API Error: ${response.statusText}`);
             }
-            return response.json();
+            return response.json(); // Trả về kết quả JSON
         } catch (error) {
             console.error("Request failed", error);
             alert("Có lỗi xảy ra, vui lòng thử lại.");
-            throw error;
+            throw error; // Đảm bảo lỗi được ném ra để có thể xử lý ở ngoài
         }
     }
 
@@ -58,15 +59,15 @@ class APIClient {
             });
 
             if (!response.ok) {
-                throw new Error('Login failed');
+                throw new Error('Đăng nhập thất bại');
             }
 
             const data = await response.json();
-            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('access_token', data.access_token);  // Lưu token vào localStorage
 
             // Sau khi đăng nhập, lấy thông tin người dùng
             const userInfo = await this.getUserInfo();
-            localStorage.setItem('user_info', JSON.stringify(userInfo));
+            localStorage.setItem('user_info', JSON.stringify(userInfo));  // Lưu thông tin người dùng
 
             return data;
         } catch (error) {
@@ -86,7 +87,7 @@ class APIClient {
             });
 
             if (!response.ok) {
-                throw new Error('Registration failed');
+                throw new Error('Đăng ký thất bại');
             }
 
             return await response.json();
@@ -100,6 +101,13 @@ class APIClient {
     // Lấy thông tin người dùng hiện tại
     async getUserInfo() {
         return this.request('/auth/me', { method: 'GET' });
+    }
+
+    // Phương thức đăng xuất
+    logout() {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_info');
+        window.location.href = '/static/login.html';  // Điều hướng đến trang đăng nhập
     }
 }
 
