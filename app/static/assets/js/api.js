@@ -1,14 +1,14 @@
-// api.js
-
 class APIClient {
     constructor() {
-        this.baseURL = 'http://localhost:8000'; // Đảm bảo backend đang chạy ở đúng port
+        this.baseURL = 'http://127.0.0.1:8000';  // Đảm bảo đúng port backend
     }
 
+    // Lấy token từ localStorage
     getToken() {
         return localStorage.getItem('access_token');
     }
 
+    // Lấy headers cho yêu cầu, bao gồm Authorization nếu cần
     getHeaders(includeAuth = true) {
         const headers = { 'Content-Type': 'application/json' };
         if (includeAuth) {
@@ -18,6 +18,7 @@ class APIClient {
         return headers;
     }
 
+    // Phương thức request chung
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
@@ -27,15 +28,14 @@ class APIClient {
 
         try {
             const response = await fetch(url, config);
-
             if (!response.ok) {
                 if (response.status === 401) {
                     localStorage.removeItem('access_token');
-                    window.location.href = '/login.html';
+                    localStorage.removeItem('user_info');
+                    window.location.href = '/static/login.html';
                 }
                 throw new Error(`API Error: ${response.statusText}`);
             }
-
             return response.json();
         } catch (error) {
             console.error("Request failed", error);
@@ -44,7 +44,7 @@ class APIClient {
         }
     }
 
-    // --- AUTHENTICATION ---
+    // Phương thức đăng nhập
     async login(username, password) {
         const formData = new URLSearchParams();
         formData.append('username', username);
@@ -64,6 +64,10 @@ class APIClient {
             const data = await response.json();
             localStorage.setItem('access_token', data.access_token);
 
+            // Sau khi đăng nhập, lấy thông tin người dùng
+            const userInfo = await this.getUserInfo();
+            localStorage.setItem('user_info', JSON.stringify(userInfo));
+
             return data;
         } catch (error) {
             console.error('Login failed: ', error);
@@ -72,18 +76,32 @@ class APIClient {
         }
     }
 
+    // Phương thức đăng ký
     async register(userData) {
-        return this.request('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(userData),
-            requireAuth: false
-        });
+        try {
+            const response = await fetch(`${this.baseURL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Registration failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Registration failed: ', error);
+            alert('Đăng ký thất bại. Vui lòng thử lại!');
+            throw error;
+        }
     }
 
+    // Lấy thông tin người dùng hiện tại
     async getUserInfo() {
         return this.request('/auth/me', { method: 'GET' });
     }
 }
 
-// Khởi tạo API client
+// Khởi tạo đối tượng APIClient
 const api = new APIClient();
