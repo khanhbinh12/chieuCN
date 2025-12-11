@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracking - Time Tracking</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Time Tracking App</h1>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="projects.html">Projects & Tasks</a></li>
+                    <li><a href="tracking.html">Time Tracking</a></li>
+                    <li><a href="report.html">Daily Report</a></li>
+                    <li><a href="statistics.html">Statistics</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="mt-20">Time Tracking</h2>
+
+        <div class="card mt-20">
+            <h3>Chọn Task để bắt đầu tracking</h3>
+            <form id="selectTaskForm">
+                <div class="form-group">
+                    <label for="selectProject">Chọn Project:</label>
+                    <select id="selectProject" name="selectProject" required>
+                        <option value="">-- Chọn Project --</option>
+                        <option value="1">Project Demo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selectTask">Chọn Task:</label>
+                    <select id="selectTask" name="selectTask" required>
+                        <option value="">-- Chọn Task --</option>
+                        <option value="1">Task Demo 1</option>
+                        <option value="2">Task Demo 2</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="timer-container">
+            <h2>Stopwatch</h2>
+            
+            <div class="timer-status">
+                <p><strong>Project:</strong> <span id="displayProject">Chưa chọn</span></p>
+                <p><strong>Task:</strong> <span id="displayTask">Chưa chọn</span></p>
+                <p><strong>Trạng thái:</strong> <span id="timerStatus">Chưa bắt đầu</span></p>
+            </div>
+
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+
+            <div class="timer-controls">
+                <button class="btn btn-success" id="startBtn">Start</button>
+                <button class="btn btn-warning" id="pauseBtn" style="display: none;">Pause</button>
+                <button class="btn btn-success" id="resumeBtn" style="display: none;">Resume</button>
+                <button class="btn btn-danger" id="stopBtn" style="display: none;">Stop</button>
+            </div>
+
+            <div id="noteSection" style="display: none; margin-top: 20px;">
+                <div class="form-group">
+                    <label for="taskNote">Ghi chú (tùy chọn):</label>
+                    <textarea id="taskNote" placeholder="Ghi chú về công việc đã làm..."></textarea>
+                </div>
+                <button class="btn btn-primary" id="saveBtn">Lưu lại</button>
+            </div>
+        </div>
+
+        <div class="list-container">
+            <h2>Tracking hôm nay</h2>
+            <div id="todayTrackingList">
+                <div class="list-item">
+                    <div>
+                        <h4>Task Demo 1 - Project Demo</h4>
+                        <p>09:00 - 11:30 (2.5 giờ)</p>
+                        <p>Ghi chú: Hoàn thành feature X</p>
+                    </div>
+                    <div class="list-actions">
+                        <button class="btn btn-warning" onclick="editTracking(1)">Sửa</button>
+                        <button class="btn btn-danger" onclick="deleteTracking(1)">Xóa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            console.log('Logout clicked');
+        });
+
+        let timerInterval = null;
+        let startTime = null;
+        let pausedTime = 0;
+        let isPaused = false;
+        let selectedTaskId = null;
+        let selectedProjectName = null;
+        let selectedTaskName = null;
+
+        document.getElementById('selectProject').addEventListener('change', function() {
+            const projectId = this.value;
+            console.log('Selected project:', projectId);
+        });
+
+        document.getElementById('selectTask').addEventListener('change', function() {
+            selectedTaskId = this.value;
+            const taskOption = this.options[this.selectedIndex];
+            selectedTaskName = taskOption.text;
+            selectedProjectName = document.getElementById('selectProject').options[document.getElementById('selectProject').selectedIndex].text;
+            
+            document.getElementById('displayProject').textContent = selectedProjectName;
+            document.getElementById('displayTask').textContent = selectedTaskName;
+        });
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            if (!selectedTaskId) {
+                alert('Vui lòng chọn task trước khi bắt đầu!');
+                return;
+            }
+
+            startTime = Date.now() - pausedTime;
+            isPaused = false;
+            
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            document.getElementById('timerStatus').textContent = 'Đang chạy';
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            
+            saveTimerState();
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            isPaused = true;
+            pausedTime = Date.now() - startTime;
+            
+            document.getElementById('timerStatus').textContent = 'Đang tạm dừng';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('resumeBtn').style.display = 'inline-block';
+            
+            saveTimerState();
+        });
+
+        document.getElementById('resumeBtn').addEventListener('click', function() {
+            startTime = Date.now() - pausedTime;
+            isPaused = false;
+            
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            document.getElementById('timerStatus').textContent = 'Đang chạy';
+            document.getElementById('resumeBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+            
+            saveTimerState();
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            
+            document.getElementById('timerStatus').textContent = 'Đã dừng';
+            document.getElementById('noteSection').style.display = 'block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('resumeBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'none';
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const note = document.getElementById('taskNote').value;
+            const duration = pausedTime || (Date.now() - startTime);
+            
+            console.log('Save tracking:', {
+                taskId: selectedTaskId,
+                startTime: new Date(startTime),
+                duration: duration,
+                note: note
+            });
+            
+            resetTimer();
+            alert('Đã lưu thời gian tracking!');
+        });
+
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('timerDisplay').textContent = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+        }
+
+        function saveTimerState() {
+            const state = {
+                taskId: selectedTaskId,
+                projectName: selectedProjectName,
+                taskName: selectedTaskName,
+                startTime: startTime,
+                pausedTime: pausedTime,
+                isPaused: isPaused
+            };
+            // localStorage.setItem('timer_state', JSON.stringify(state));
+        }
+
+        function resetTimer() {
+            timerInterval = null;
+            startTime = null;
+            pausedTime = 0;
+            isPaused = false;
+            
+            document.getElementById('timerDisplay').textContent = '00:00:00';
+            document.getElementById('timerStatus').textContent = 'Chưa bắt đầu';
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('resumeBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('noteSection').style.display = 'none';
+            document.getElementById('taskNote').value = '';
+        }
+
+        function editTracking(trackingId) {
+            console.log('Edit tracking:', trackingId);
+        }
+
+        function deleteTracking(trackingId) {
+            if (confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
+                console.log('Delete tracking:', trackingId);
+            }
+        }
+    </script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/tracking.js"></script>
+</body>
+</html>

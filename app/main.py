@@ -28,15 +28,44 @@ app.include_router(time_entries.router)
 # Mount thư mục static chỉ cần 1 lần
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
-# Các route trang chính
+# Cập nhật route để chuyển hướng đến login.html thay vì dashboard.html
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    return FileResponse(BASE_DIR / "static" / "index.html")
+    # Chuyển hướng đến login.html thay vì dashboard.html
+    return FileResponse(BASE_DIR / "static" / "login.html")
+
 
 @app.get("/login.html", response_class=HTMLResponse)
 async def login_page():
+    # Trước tiên, người dùng sẽ vào trang đăng nhập
     return FileResponse(BASE_DIR / "static" / "login.html")
 
 @app.get("/register.html", response_class=HTMLResponse)
 async def register_page():
+    # Sau khi vào login, người dùng có thể đăng ký tài khoản
     return FileResponse(BASE_DIR / "static" / "register.html")
+
+@app.get("/dashboard.html", response_class=HTMLResponse)
+async def dashboard_page():
+    # Sau khi đăng nhập thành công, người dùng sẽ được chuyển đến dashboard
+    return FileResponse(BASE_DIR / "static" / "dashboard.html")
+
+@app.get("/projects.html", response_class=HTMLResponse)
+async def projects_page():
+    # Sau khi vào dashboard, người dùng sẽ vào trang quản lý projects
+    return FileResponse(BASE_DIR / "static" / "projects.html")
+
+@app.get("/tracking.html", response_class=HTMLResponse)
+async def tracking_page():
+    # Từ dashboard, người dùng có thể bắt đầu theo dõi thời gian cho task
+    return FileResponse(BASE_DIR / "static" / "tracking.html")
+
+@app.get("/report.html", response_class=HTMLResponse)
+async def report_page():
+    # Sau khi làm việc xong, người dùng có thể xem báo cáo hàng ngày
+    return FileResponse(BASE_DIR / "static" / "report.html")
+
+@app.get("/statistics.html", response_class=HTMLResponse)
+async def statistics_page():
+    # Người dùng có thể xem thống kê tổng quan theo tuần hoặc tháng
+    return FileResponse(BASE_DIR / "static" / "statistics.html")

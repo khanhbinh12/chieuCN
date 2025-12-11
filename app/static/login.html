@@ -3,43 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Time Tracking App</title>
-    <!-- Cập nhật đường dẫn CSS -->
-    <link rel="stylesheet" href="/static/assets/css/style.css">
+    <title>Đăng nhập - Time Tracking</title>
+    <!-- Correct link to the styles.css -->
+    <link rel="stylesheet" href="static/css/style.css">
 </head>
-<body class="login-page">
-    <div class="login-container">
-        <div class="login-form">
-            <h1>Time Tracking</h1>
-            <h2>Đăng nhập hệ thống</h2>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Tên đăng nhập:</label>
-                    <input type="text" id="username" name="username" placeholder="Nhập username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Mật khẩu:</label>
-                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
-                </div>
-                
-                <button type="submit" id="loginBtn" class="btn btn-primary" style="width: 100%;">Đăng nhập</button>
-            </form>
-            
-            <p style="margin-top: 15px; text-align: center;">
-                Chưa có tài khoản? <a href="/static/register.html" style="color: #3498db; text-decoration: none;">Đăng ký ngay</a>
-            </p>
-            
-            <div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 0.9em; color: #666;">
-                <strong>Tài khoản demo:</strong><br>
-                User: <code>kbinh</code> / Pass: <code>kbinh</code>
+<body>
+    <div class="auth-container">
+        <h2>Đăng nhập</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="Nhập email của bạn">
             </div>
-        </div>
+            <div class="form-group">
+                <label for="password">Mật khẩu:</label>
+                <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
+            </div>
+            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+        </form>
+        <p class="text-center mt-20">
+            Chưa có tài khoản? <a href="register.html" class="text-link">Đăng ký ngay</a>
+        </p>
     </div>
-    
-    <!-- Cập nhật đường dẫn JS -->
-    <script src="/static/js/api.js"></script> <!-- Đảm bảo đúng đường dẫn -->
-<script src="/static/assets/js/login.js"></script> <!-- Đảm bảo đây là file JavaScript dành cho đăng nhập -->
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // TODO: Gọi API đăng nhập
+            console.log('Login:', email, password);
+            
+            // Giả lập lưu JWT vào localStorage
+            // localStorage.setItem('jwt_token', 'fake_token_here');
+            
+            // Chuyển đến dashboard
+            // window.location.href = 'dashboard.html';
+        });
+    </script>
+
+   <script src="static/js/app.js"></script>
+<script src="assets/js/login.js"></script>
+
 </body>
 </html>

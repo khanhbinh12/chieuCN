@@ -63,13 +63,22 @@ class APIClient {
             }
 
             const data = await response.json();
-            localStorage.setItem('access_token', data.access_token);  // Lưu token vào localStorage
 
-            // Sau khi đăng nhập, lấy thông tin người dùng
-            const userInfo = await this.getUserInfo();
-            localStorage.setItem('user_info', JSON.stringify(userInfo));  // Lưu thông tin người dùng
+            if (data.access_token) {
+                // Lưu JWT token vào localStorage
+                localStorage.setItem('access_token', data.access_token);
 
-            return data;
+                // Sau khi đăng nhập, lấy thông tin người dùng
+                const userInfo = await this.getUserInfo();
+                localStorage.setItem('user_info', JSON.stringify(userInfo));  // Lưu thông tin người dùng
+
+                // Điều hướng đến trang dashboard
+                window.location.href = 'dashboard.html';
+
+                return data;
+            } else {
+                throw new Error('Không có access_token trong dữ liệu trả về');
+            }
         } catch (error) {
             console.error('Login failed: ', error);
             alert('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!');

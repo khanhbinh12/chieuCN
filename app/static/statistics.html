@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Time Tracking</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Time Tracking App</h1>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="projects.html">Projects & Tasks</a></li>
+                    <li><a href="tracking.html">Time Tracking</a></li>
+                    <li><a href="report.html">Daily Report</a></li>
+                    <li><a href="statistics.html">Statistics</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="mt-20">Statistics</h2>
+
+        <!-- Filter khoảng thời gian -->
+        <div class="filter-section">
+            <div class="form-group">
+                <label for="startDate">Từ ngày:</label>
+                <input type="date" id="startDate" name="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate">Đến ngày:</label>
+                <input type="date" id="endDate" name="endDate">
+            </div>
+            <button class="btn btn-primary" id="filterBtn">Lọc</button>
+            <button class="btn btn-secondary" id="thisWeekBtn">Tuần này</button>
+            <button class="btn btn-secondary" id="thisMonthBtn">Tháng này</button>
+        </div>
+
+        <!-- Tổng quan -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Tổng giờ làm việc</h3>
+                <div class="stat-value" id="totalHours">42.5</div>
+                <div class="stat-label">giờ</div>
+            </div>
+
+            <div class="card">
+                <h3>Số ngày làm việc</h3>
+                <div class="stat-value" id="workingDays">5</div>
+                <div class="stat-label">ngày</div>
+            </div>
+
+            <div class="card">
+                <h3>Trung bình mỗi ngày</h3>
+                <div class="stat-value" id="avgPerDay">8.5</div>
+                <div class="stat-label">giờ/ngày</div>
+            </div>
+
+            <div class="card">
+                <h3>Số Projects</h3>
+                <div class="stat-value" id="totalProjects">3</div>
+                <div class="stat-label">projects</div>
+            </div>
+        </div>
+
+        <!-- Bảng tổng giờ theo project -->
+        <div class="table-container">
+            <h3>Thống kê theo Project</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Số Tasks</th>
+                        <th>Tổng giờ</th>
+                        <th>% Tổng thời gian</th>
+                        <th>Trung bình/Task</th>
+                    </tr>
+                </thead>
+                <tbody id="projectStatsBody">
+                    <!-- Dữ liệu sẽ được load động ở đây -->
+                    <tr>
+                        <td>Project Demo 1</td>
+                        <td>5</td>
+                        <td>20.0</td>
+                        <td>47%</td>
+                        <td>4.0</td>
+                    </tr>
+                    <tr>
+                        <td>Project Demo 2</td>
+                        <td>8</td>
+                        <td>15.5</td>
+                        <td>36%</td>
+                        <td>1.9</td>
+                    </tr>
+                    <tr>
+                        <td>Project Demo 3</td>
+                        <td>3</td>
+                        <td>7.0</td>
+                        <td>17%</td>
+                        <td>2.3</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #ecf0f1;">
+                        <td>Tổng cộng</td>
+                        <td>16</td>
+                        <td>42.5</td>
+                        <td>100%</td>
+                        <td>2.7</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Thống kê theo ngày -->
+        <div class="table-container">
+            <h3>Thống kê theo ngày</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Thứ</th>
+                        <th>Số Tasks</th>
+                        <th>Tổng giờ</th>
+                        <th>Projects</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyStatsBody">
+                    <!-- Dữ liệu sẽ được load động ở đây -->
+                    <tr>
+                        <td>11/12/2024</td>
+                        <td>Thứ 2</td>
+                        <td>3</td>
+                        <td>8.5</td>
+                        <td>Project Demo 1, Project Demo 2</td>
+                    </tr>
+                    <tr>
+                        <td>10/12/2024</td>
+                        <td>Thứ 3</td>
+                        <td>4</td>
+                        <td>9.0</td>
+                        <td>Project Demo 1, Project Demo 3</td>
+                    </tr>
+                    <tr>
+                        <td>09/12/2024</td>
+                        <td>Thứ 4</td>
+                        <td>3</td>
+                        <td>7.5</td>
+                        <td>Project Demo 2</td>
+                    </tr>
+                    <tr>
+                        <td>08/12/2024</td>
+                        <td>Thứ 5</td>
+                        <td>3</td>
+                        <td>8.0</td>
+                        <td>Project Demo 1, Project Demo 2</td>
+                    </tr>
+                    <tr>
+                        <td>07/12/2024</td>
+                        <td>Thứ 6</td>
+                        <td>3</td>
+                        <td>9.5</td>
+                        <td>Project Demo 2, Project Demo 3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chart placeholder (nâng cao) -->
+        <div class="card mt-20">
+            <h3>Biểu đồ thống kê (Nâng cao)</h3>
+            <div style="text-align: center; padding: 40px; background-color: #ecf0f1; border-radius: 4px;">
+                <p style="color: #7f8c8d;">Vị trí để vẽ chart theo tuần/tháng</p>
+                <p style="color: #7f8c8d; font-size: 12px;">Có thể dùng Chart.js, D3.js hoặc thư viện khác</p>
+                <div id="chartContainer" style="min-height: 300px; margin-top: 20px;">
+                    <!-- Chart sẽ được render ở đây -->
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Tasks -->
+        <div class="card mt-20">
+            <h3>Top 10 Tasks tốn nhiều thời gian nhất</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Task</th>
+                        <th>Project</th>
+                        <th>Tổng giờ</th>
+                        <th>Số lần tracking</th>
+                    </tr>
+                </thead>
+                <tbody id="topTasksBody">
+                    <tr>
+                        <td>1</td>
+                        <td>Task Demo A</td>
+                        <td>Project Demo 1</td>
+                        <td>12.5</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Task Demo B</td>
+                        <td>Project Demo 2</td>
+                        <td>10.0</td>
+                        <td>6</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Task Demo C</td>
+                        <td>Project Demo 1</td>
+                        <td>8.5</td>
+                        <td>5</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Export -->
+        <div class="card mt-20">
+            <h3>Export thống kê</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" id="exportExcelBtn">Export Excel</button>
+                <button class="btn btn-primary" id="exportPdfBtn">Export PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Xử lý đăng xuất
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            console.log('Logout clicked');
+        });
+
+        // Set ngày mặc định (tuần này)
+        const today = new Date();
+        const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+        const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
+        
+        document.getElementById('startDate').value = firstDayOfWeek.toISOString().split('T')[0];
+        document.getElementById('endDate').value = lastDayOfWeek.toISOString().split('T')[0];
+
+        // Xử lý filter
+        document.getElementById('filterBtn').addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn đầy đủ khoảng thời gian!');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Ngày bắt đầu phải nhỏ hơn ngày kết thúc!');
+                return;
+            }
+            
+            // TODO: Gọi API load dữ liệu
+            console.log('Filter from', startDate, 'to', endDate);
+            loadStatistics(startDate, endDate);
+        });
+
+        // Nút tuần này
+        document.getElementById('thisWeekBtn').addEventListener('click', function() {
+            const today = new Date();
+            const firstDay = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+            const lastDay = new Date(today.setDate(today.getDate() - today.getDay() + 7));
+            
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+            
+            loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
+        });
+
+        // Nút tháng này
+        document.getElementById('thisMonthBtn').addEventListener('click', function() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+            
+            loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
+        });
+
+        // Load thống kê
+        function loadStatistics(startDate, endDate) {
+            // TODO: Gọi API load dữ liệu thống kê
+            console.log('Loading statistics from', startDate, 'to', endDate);
+            
+            // Giả lập update UI
+            // updateOverview();
+            // updateProjectStats();
+            // updateDailyStats();
+            // updateChart();
+            // updateTopTasks();
+        }
+
+        // Export Excel
+        document.getElementById('exportExcelBtn').addEventListener('click', function() {
+            // TODO: Implement export to Excel
+            console.log('Export statistics to Excel');
+        });
+
+        // Export PDF
+        document.getElementById('exportPdfBtn').addEventListener('click', function() {
+            // TODO: Implement export to PDF
+            console.log('Export statistics to PDF');
+        });
+
+        // Vẽ chart (nâng cao - có thể dùng Chart.js)
+        function drawChart() {
+            // TODO: Implement chart drawing
+            // Ví dụ với Chart.js:
+            // const ctx = document.getElementById('statsChart').getContext('2d');
+            // const chart = new Chart(ctx, {...});
+            console.log('Drawing chart...');
+        }
+
+        // Load dữ liệu khi trang được tải
+        loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
+    </script>
+</body>
+</html>

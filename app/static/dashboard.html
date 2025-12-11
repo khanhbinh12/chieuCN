@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Time Tracking</title>
+    <link rel="stylesheet" href="/static/assets/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Time Tracking App</h1>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="projects.html">Projects & Tasks</a></li>
+                    <li><a href="tracking.html">Time Tracking</a></li>
+                    <li><a href="report.html">Daily Report</a></li>
+                    <li><a href="statistics.html">Statistics</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="mt-20">Dashboard</h2>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Tổng giờ hôm nay</h3>
+                <div class="stat-value" id="totalHoursToday">0.0</div>
+                <div class="stat-label">giờ</div>
+            </div>
+
+            <div class="card">
+                <h3>Project đang active</h3>
+                <div id="activeProject">
+                    <p>Chưa có project nào đang chạy</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Task hiện tại</h3>
+                <div id="currentTask">
+                    <p>Chưa có task nào đang chạy</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-20">
+            <h3>Quick Actions</h3>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-success" onclick="window.location.href='tracking.html'">
+                    Start Tracking
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='projects.html'">
+                    Quản lý Projects
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='report.html'">
+                    Xem báo cáo hôm nay
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-20">
+            <h3>Hoạt động gần đây</h3>
+            <div id="recentActivities">
+                <p>Chưa có hoạt động nào</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            console.log('Logout clicked');
+        });
+    </script>
+    
+    <script src="static/assets/js/app.js"></script>
+    <script src="static/assets/js/dashboard.js"></script>
+</body>
+</html>
