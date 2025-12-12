@@ -1,6 +1,6 @@
 class APIClient {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:8000';  // Đảm bảo đúng port backend
+        this.baseURL = window.location.origin;  // Use same origin as the page
     }
 
     // Lấy token từ localStorage hoặc sessionStorage
@@ -114,7 +114,49 @@ class APIClient {
         localStorage.removeItem('user_info');
         window.location.href = '/login.html';  // Điều hướng đến trang đăng nhập
     }
+
+    // Projects
+    async getProjects() {
+        return this.request('/projects', { method: 'GET' });
+    }
+
+    async createProject(projectData) {
+        return this.request('/projects', {
+            method: 'POST',
+            body: JSON.stringify(projectData)
+        });
+    }
+
+    // Tasks
+    async getTasks() {
+        return this.request('/tasks', { method: 'GET' });
+    }
+
+    async createTask(taskData) {
+        return this.request('/tasks', {
+            method: 'POST',
+            body: JSON.stringify(taskData)
+        });
+    }
+
+    // Time Entries
+    async startTimer(entryData) {
+        return this.request('/time-entries/start', {
+            method: 'POST',
+            body: JSON.stringify(entryData)
+        });
+    }
+
+    async stopTimer() {
+        return this.request('/time-entries/stop', { method: 'POST' });
+    }
+
+    async getTimeEntries() {
+        // Assuming we add GET /time-entries later
+        return this.request('/time-entries', { method: 'GET' });
+    }
 }
 
 // Khởi tạo đối tượng APIClient
 const api = new APIClient();
+window.api = api;

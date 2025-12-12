@@ -8,7 +8,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # URL kết nối cơ sở dữ liệu MySQL, bạn có thể thay đổi thành PostgreSQL hoặc SQLite nếu cần
-    database_url: str = os.getenv("DATABASE_URL", "mysql+pymysql://root:kbinh@localhost:3306/time_tracking_db")  # Cấu hình MySQL
+    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./time_tracking.db")  # Cấu hình SQLite
   
     # Key bí mật cho JWT (JSON Web Token) từ biến môi trường, fallback về giá trị mặc định nếu không tìm thấy
     secret_key: str = os.getenv("SECRET_KEY", "supersecretkey")

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 from app.database.connection import get_db
 from app.database.models import User
 from app.schemas.time_entry import TimeEntryStart, TimeEntryResponse
@@ -25,3 +26,10 @@ def stop_timer(
     if not entry:
         raise HTTPException(status_code=400, detail="No running timer found")
     return entry
+
+@router.get("/", response_model=List[TimeEntryResponse])
+def get_my_time_entries(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return time_repo.get_my_entries(db, current_user.id)

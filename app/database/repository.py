@@ -131,6 +131,12 @@ class TimeRepository:
         db.refresh(entry)
         return entry
 
+    def get_my_entries(self, db: Session, user_id: int):
+        """
+        Lấy tất cả time entries của user.
+        """
+        return db.query(TimeEntry).filter(TimeEntry.user_id == user_id).all()
+
 # Khởi tạo instance của các repository
 user_repo = UserRepository()
 project_repo = ProjectRepository()

@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loginBtn.disabled = true;
         }
 
-        fetch('http://127.0.0.1:8000/auth/login', {
+        fetch(`${window.location.origin}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

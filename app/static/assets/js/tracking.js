@@ -94,49 +94,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================
     // 5. FILL PROJECTS & TASKS (NẾU CÓ SELECT)
     // =========================
-    function populateProjects() {
+    async function populateProjects() {
         if (!projectIdInput || projectIdInput.tagName !== 'SELECT') return;
 
-        const projects = Storage.getProjects();
-        projectIdInput.innerHTML = '<option value="">-- Chọn Project --</option>';
+        try {
+            const projects = await window.api.getProjects();
+            projectIdInput.innerHTML = '<option value="">-- Chọn Project --</option>';
 
-        projects.forEach((p) => {
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = p.name;
-            projectIdInput.appendChild(opt);
-        });
+            projects.forEach((p) => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                projectIdInput.appendChild(opt);
+            });
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            showAlert('Lỗi khi tải danh sách projects!', 'error');
+        }
     }
 
-    function populateTasksForProject(projectId) {
+    async function populateTasksForProject(projectId) {
         if (!taskIdInput || taskIdInput.tagName !== 'SELECT') return;
 
-        const allTasks = Storage.getTasks();
         taskIdInput.innerHTML = '<option value="">-- Chọn Task --</option>';
         if (!projectId) return;
 
-        const tasks = allTasks.filter((t) => t.projectId === projectId);
-        tasks.forEach((t) => {
-            const opt = document.createElement('option');
-            opt.value = t.id;
-            opt.textContent = t.name;
-            taskIdInput.appendChild(opt);
-        });
+        try {
+            const allTasks = await window.api.getTasks();
+            const tasks = allTasks.filter((t) => t.project_id === parseInt(projectId));
+            tasks.forEach((t) => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.title;
+                taskIdInput.appendChild(opt);
+            });
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            showAlert('Lỗi khi tải danh sách tasks!', 'error');
+        }
     }
 
     // Gắn event khi chọn project để lọc task
     if (projectIdInput && projectIdInput.tagName === 'SELECT') {
-        projectIdInput.addEventListener('change', (e) => {
+        projectIdInput.addEventListener('change', async (e) => {
             const projectId = e.target.value;
-            populateTasksForProject(projectId);
+            await populateTasksForProject(projectId);
         });
     }
 
     // Lần đầu load
-    populateProjects();
-    if (projectIdInput && projectIdInput.value) {
-        populateTasksForProject(projectIdInput.value);
-    }
+    (async () => {
+        await populateProjects();
+        if (projectIdInput && projectIdInput.value) {
+            await populateTasksForProject(projectIdInput.value);
+        }
+    })();
 
     // =========================
     // 6. KHÔI PHỤC TRẠNG THÁI TIMER
@@ -169,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7. NÚT START
     // =========================
     if (startBtn) {
-        startBtn.addEventListener('click', () => {
+        startBtn.addEventListener('click', async () => {
             const taskId = taskIdInput ? taskIdInput.value : '';
             const projectId = projectIdInput ? projectIdInput.value : '';
 
@@ -178,15 +190,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const ok = Timer.start(taskId, projectId);
-            if (!ok) return;
+            try {
+                const note = taskNoteInput ? taskNoteInput.value.trim() : '';
+                const response = await window.api.startTimer({ task_id: parseInt(taskId), note: note || null });
+                console.log('Started timer:', response);
 
-            lastEntry = null; // reset entry cũ
-            clearIntervalIfAny();
-            updateTrackingDisplay();
-            trackingInterval = setInterval(updateTrackingDisplay, 1000);
+                // Start local timer for display
+                const ok = Timer.start(taskId, projectId);
+                if (!ok) return;
 
-            showAlert('Bắt đầu tracking!', 'success');
+                lastEntry = null; // reset entry cũ
+                clearIntervalIfAny();
+                updateTrackingDisplay();
+                trackingInterval = setInterval(updateTrackingDisplay, 1000);
+
+                showAlert('Bắt đầu tracking!', 'success');
+            } catch (error) {
+                console.error('Start timer error:', error);
+                showAlert('Lỗi khi bắt đầu tracking!', 'error');
+            }
         });
     }
 
@@ -206,21 +228,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. NÚT STOP (TẠO ENTRY TẠM, CHƯA LƯU)
     // =========================
     if (stopBtn) {
-        stopBtn.addEventListener('click', () => {
-            clearIntervalIfAny();
-            const entry = Timer.stop(); // tạo entry và clear TIMER_STATE
+        stopBtn.addEventListener('click', async () => {
+            try {
+                const response = await window.api.stopTimer();
+                console.log('Stopped timer:', response);
 
-            if (!entry) {
-                showAlert('Không có phiên làm việc nào để dừng.', 'error');
+                clearIntervalIfAny();
+                const entry = Timer.stop(); // clear local timer
+
                 if (trackingDisplay) trackingDisplay.textContent = '00:00:00';
-                return;
+
+                showAlert('Đã dừng tracking!', 'success');
+                console.log('Stopped entry:', response);
+            } catch (error) {
+                console.error('Stop timer error:', error);
+                showAlert('Lỗi khi dừng tracking!', 'error');
             }
-
-            lastEntry = entry;
-            if (trackingDisplay) trackingDisplay.textContent = '00:00:00';
-
-            showAlert('Đã dừng tracking, bấm Lưu để lưu lại!', 'success');
-            console.log('Stopped entry (waiting to save):', entry);
         });
     }
 

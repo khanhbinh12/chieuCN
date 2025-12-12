@@ -1,13 +1,13 @@
 // register.js - Xử lý đăng ký người dùng
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Kiểm tra nếu đã đăng nhập thì chuyển đến dashboard
-    const token = localStorage.getItem('jwt_token');
+    // Kiểm tra nếu đã đăng nhập thì hiển thị thông báo
+    const token = localStorage.getItem('access_token');
     if (token) {
-        window.location.href = 'dashboard.html';
-        return;
+        showAlert('Bạn đã đăng nhập. Nếu muốn đăng ký tài khoản mới, hãy đăng xuất trước.', 'info');
+        // Không redirect, cho phép ở lại trang register
     }
 
     const registerForm = document.getElementById('registerForm');
@@ -15,13 +15,14 @@ document.addEventListener('DOMContentLoaded', function () {
     registerForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
+        const username = document.getElementById('username').value.trim();
         const fullname = document.getElementById('fullname').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
 
         // Validation
-        if (!fullname || !email || !password || !confirmPassword) {
+        if (!username || !fullname || !email || !password || !confirmPassword) {
             showAlert('Vui lòng điền đầy đủ thông tin!', 'error');
             return;
         }
@@ -51,7 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    fullname: fullname,
+                    username: username,
+                    full_name: fullname,
                     email: email,
                     password: password
                 })
