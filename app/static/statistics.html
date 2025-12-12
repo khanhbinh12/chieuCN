@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistics - Time Tracking</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -235,7 +237,7 @@
 
     <script>
         // Xử lý đăng xuất
-        document.getElementById('logoutBtn').addEventListener('click', function() {
+        document.getElementById('logoutBtn').addEventListener('click', function () {
             console.log('Logout clicked');
         });
 
@@ -243,51 +245,51 @@
         const today = new Date();
         const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
         const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-        
+
         document.getElementById('startDate').value = firstDayOfWeek.toISOString().split('T')[0];
         document.getElementById('endDate').value = lastDayOfWeek.toISOString().split('T')[0];
 
         // Xử lý filter
-        document.getElementById('filterBtn').addEventListener('click', function() {
+        document.getElementById('filterBtn').addEventListener('click', function () {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            
+
             if (!startDate || !endDate) {
                 alert('Vui lòng chọn đầy đủ khoảng thời gian!');
                 return;
             }
-            
+
             if (new Date(startDate) > new Date(endDate)) {
                 alert('Ngày bắt đầu phải nhỏ hơn ngày kết thúc!');
                 return;
             }
-            
+
             // TODO: Gọi API load dữ liệu
             console.log('Filter from', startDate, 'to', endDate);
             loadStatistics(startDate, endDate);
         });
 
         // Nút tuần này
-        document.getElementById('thisWeekBtn').addEventListener('click', function() {
+        document.getElementById('thisWeekBtn').addEventListener('click', function () {
             const today = new Date();
             const firstDay = new Date(today.setDate(today.getDate() - today.getDay() + 1));
             const lastDay = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-            
+
             document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
             document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
-            
+
             loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
         });
 
         // Nút tháng này
-        document.getElementById('thisMonthBtn').addEventListener('click', function() {
+        document.getElementById('thisMonthBtn').addEventListener('click', function () {
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            
+
             document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
             document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
-            
+
             loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
         });
 
@@ -295,7 +297,7 @@
         function loadStatistics(startDate, endDate) {
             // TODO: Gọi API load dữ liệu thống kê
             console.log('Loading statistics from', startDate, 'to', endDate);
-            
+
             // Giả lập update UI
             // updateOverview();
             // updateProjectStats();
@@ -305,13 +307,13 @@
         }
 
         // Export Excel
-        document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        document.getElementById('exportExcelBtn').addEventListener('click', function () {
             // TODO: Implement export to Excel
             console.log('Export statistics to Excel');
         });
 
         // Export PDF
-        document.getElementById('exportPdfBtn').addEventListener('click', function() {
+        document.getElementById('exportPdfBtn').addEventListener('click', function () {
             // TODO: Implement export to PDF
             console.log('Export statistics to PDF');
         });
@@ -329,4 +331,5 @@
         loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
     </script>
 </body>
+
 </html>
