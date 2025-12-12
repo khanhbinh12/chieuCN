@@ -3,9 +3,9 @@ class APIClient {
         this.baseURL = 'http://127.0.0.1:8000';  // Đảm bảo đúng port backend
     }
 
-    // Lấy token từ localStorage
+    // Lấy token từ localStorage hoặc sessionStorage
     getToken() {
-        return localStorage.getItem('access_token');
+        return localStorage.getItem('access_token');  // Hoặc sessionStorage.getItem nếu bạn muốn dùng sessionStorage
     }
 
     // Lấy headers cho yêu cầu, bao gồm Authorization nếu cần
@@ -33,7 +33,7 @@ class APIClient {
                     // Xóa token và thông tin người dùng khi hết hạn token
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('user_info');
-                    window.location.href = '/static/login.html';  // Điều hướng về trang đăng nhập
+                    window.location.href = '/login.html';  // Điều hướng về trang đăng nhập
                 }
                 throw new Error(`API Error: ${response.statusText}`);
             }
@@ -58,13 +58,9 @@ class APIClient {
                 body: formData
             });
 
-            if (!response.ok) {
-                throw new Error('Đăng nhập thất bại');
-            }
-
             const data = await response.json();
 
-            if (data.access_token) {
+            if (response.ok && data.access_token) {
                 // Lưu JWT token vào localStorage
                 localStorage.setItem('access_token', data.access_token);
 
@@ -73,11 +69,11 @@ class APIClient {
                 localStorage.setItem('user_info', JSON.stringify(userInfo));  // Lưu thông tin người dùng
 
                 // Điều hướng đến trang dashboard
-                window.location.href = 'dashboard.html';
+                window.location.href = '/dashboard.html';  // Điều hướng đến trang dashboard
 
                 return data;
             } else {
-                throw new Error('Không có access_token trong dữ liệu trả về');
+                throw new Error(data.detail || 'Đăng nhập thất bại');
             }
         } catch (error) {
             console.error('Login failed: ', error);
@@ -116,7 +112,7 @@ class APIClient {
     logout() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user_info');
-        window.location.href = '/static/login.html';  // Điều hướng đến trang đăng nhập
+        window.location.href = '/login.html';  // Điều hướng đến trang đăng nhập
     }
 }
 
