@@ -1,42 +1,77 @@
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();  // Ngừng hành động mặc định của form (tức là không reload trang)
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
 
-    // Lấy giá trị username và password từ các ô nhập liệu
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    if (!form) {
+        console.error('Không tìm thấy form với id="loginForm"');
+        return;
+    }
 
-    // Hiển thị thông báo khi đang gửi yêu cầu (optional)
-    const loginBtn = document.getElementById("loginBtn");
-    loginBtn.textContent = "Đang đăng nhập...";  // Cập nhật nút đăng nhập
-    loginBtn.disabled = true; // Vô hiệu hóa nút đăng nhập trong quá trình gửi yêu cầu
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    // Gửi yêu cầu POST đến backend để xác thực đăng nhập
-    fetch('http://127.0.0.1:8000/auth/login', {  // Đảm bảo API này tồn tại và đúng địa chỉ
-        method: 'POST',  // Đảm bảo sử dụng phương thức POST
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',  // Sử dụng đúng kiểu dữ liệu
-        },
-        body: new URLSearchParams({
-            'username': username,
-            'password': password
-        })
-    })
-    .then(response => response.json())  // Chuyển đổi phản hồi thành JSON
-    .then(data => {
-        if (data.access_token) {
-            localStorage.setItem('access_token', data.access_token);  // Lưu token vào localStorage
-            localStorage.setItem('user_info', JSON.stringify(data.user));  // Lưu thông tin người dùng
-            window.location.href = '/';  // Chuyển đến trang chủ index.html sau khi đăng nhập thành công
-        } else {
-            alert('Tên đăng nhập hoặc mật khẩu sai');
-            loginBtn.textContent = "Đăng nhập";  // Cập nhật lại nút đăng nhập
-            loginBtn.disabled = false;  // Bật lại nút đăng nhập
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        if (!usernameInput || !passwordInput) {
+            console.error('Không tìm thấy input username hoặc password');
+            alert('Có lỗi xảy ra với form đăng nhập. Vui lòng kiểm tra lại HTML.');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Lỗi:', error);
-        alert('Đã có lỗi xảy ra, vui lòng thử lại');
-        loginBtn.textContent = "Đăng nhập";  // Cập nhật lại nút đăng nhập
-        loginBtn.disabled = false;  // Bật lại nút đăng nhập
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!username || !password) {
+            alert('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
+            return;
+        }
+
+        if (loginBtn) {
+            loginBtn.textContent = 'Đang đăng nhập...';
+            loginBtn.disabled = true;
+        }
+
+        fetch('http://127.0.0.1:8000/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                // Backend (OAuth2PasswordRequestForm) mong chờ field "username"
+                username: username,
+                password: password,
+            }),
+        })
+            .then(async (response) => {
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    const msg = data.detail || 'Tên đăng nhập hoặc mật khẩu sai';
+                    throw new Error(msg);
+                }
+
+                if (!data.access_token) {
+                    throw new Error('Không nhận được access_token từ server');
+                }
+
+                localStorage.setItem('access_token', data.access_token);
+                if (data.user) {
+                    localStorage.setItem('user_info', JSON.stringify(data.user));
+                }
+
+                // 🔥 Đăng nhập OK → sang thẳng dashboard
+                window.location.href = '/dashboard.html';
+            })
+            .catch((error) => {
+                console.error('Lỗi đăng nhập:', error);
+                alert(error.message || 'Đã có lỗi xảy ra, vui lòng thử lại');
+            })
+            .finally(() => {
+                if (loginBtn) {
+                    loginBtn.textContent = 'Đăng nhập';
+                    loginBtn.disabled = false;
+                }
+            });
     });
 });
