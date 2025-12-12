@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Time Tracking - Time Tracking</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/assets/css/tracking.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -49,7 +51,7 @@
 
         <div class="timer-container">
             <h2>Stopwatch</h2>
-            
+
             <div class="timer-status">
                 <p><strong>Project:</strong> <span id="displayProject">Chưa chọn</span></p>
                 <p><strong>Task:</strong> <span id="displayTask">Chưa chọn</span></p>
@@ -93,7 +95,7 @@
     </div>
 
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', function() {
+        document.getElementById('logoutBtn').addEventListener('click', function () {
             console.log('Logout clicked');
         });
 
@@ -105,22 +107,22 @@
         let selectedProjectName = null;
         let selectedTaskName = null;
 
-        document.getElementById('selectProject').addEventListener('change', function() {
+        document.getElementById('selectProject').addEventListener('change', function () {
             const projectId = this.value;
             console.log('Selected project:', projectId);
         });
 
-        document.getElementById('selectTask').addEventListener('change', function() {
+        document.getElementById('selectTask').addEventListener('change', function () {
             selectedTaskId = this.value;
             const taskOption = this.options[this.selectedIndex];
             selectedTaskName = taskOption.text;
             selectedProjectName = document.getElementById('selectProject').options[document.getElementById('selectProject').selectedIndex].text;
-            
+
             document.getElementById('displayProject').textContent = selectedProjectName;
             document.getElementById('displayTask').textContent = selectedTaskName;
         });
 
-        document.getElementById('startBtn').addEventListener('click', function() {
+        document.getElementById('startBtn').addEventListener('click', function () {
             if (!selectedTaskId) {
                 alert('Vui lòng chọn task trước khi bắt đầu!');
                 return;
@@ -128,45 +130,44 @@
 
             startTime = Date.now() - pausedTime;
             isPaused = false;
-            
+
             timerInterval = setInterval(updateTimer, 1000);
-            
+
             document.getElementById('timerStatus').textContent = 'Đang chạy';
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('pauseBtn').style.display = 'inline-block';
             document.getElementById('stopBtn').style.display = 'inline-block';
-            
+
             saveTimerState();
         });
-
-        document.getElementById('pauseBtn').addEventListener('click', function() {
+        document.getElementById('pauseBtn').addEventListener('click', function () {
             clearInterval(timerInterval);
             isPaused = true;
             pausedTime = Date.now() - startTime;
-            
+
             document.getElementById('timerStatus').textContent = 'Đang tạm dừng';
             document.getElementById('pauseBtn').style.display = 'none';
             document.getElementById('resumeBtn').style.display = 'inline-block';
-            
+
             saveTimerState();
         });
 
-        document.getElementById('resumeBtn').addEventListener('click', function() {
+        document.getElementById('resumeBtn').addEventListener('click', function () {
             startTime = Date.now() - pausedTime;
             isPaused = false;
-            
+
             timerInterval = setInterval(updateTimer, 1000);
-            
+
             document.getElementById('timerStatus').textContent = 'Đang chạy';
             document.getElementById('resumeBtn').style.display = 'none';
             document.getElementById('pauseBtn').style.display = 'inline-block';
-            
+
             saveTimerState();
         });
 
-        document.getElementById('stopBtn').addEventListener('click', function() {
+        document.getElementById('stopBtn').addEventListener('click', function () {
             clearInterval(timerInterval);
-            
+
             document.getElementById('timerStatus').textContent = 'Đã dừng';
             document.getElementById('noteSection').style.display = 'block';
             document.getElementById('pauseBtn').style.display = 'none';
@@ -174,17 +175,17 @@
             document.getElementById('stopBtn').style.display = 'none';
         });
 
-        document.getElementById('saveBtn').addEventListener('click', function() {
+        document.getElementById('saveBtn').addEventListener('click', function () {
             const note = document.getElementById('taskNote').value;
             const duration = pausedTime || (Date.now() - startTime);
-            
+
             console.log('Save tracking:', {
                 taskId: selectedTaskId,
                 startTime: new Date(startTime),
                 duration: duration,
                 note: note
             });
-            
+
             resetTimer();
             alert('Đã lưu thời gian tracking!');
         });
@@ -194,8 +195,8 @@
             const hours = Math.floor(elapsed / 3600000);
             const minutes = Math.floor((elapsed % 3600000) / 60000);
             const seconds = Math.floor((elapsed % 60000) / 1000);
-            
-            document.getElementById('timerDisplay').textContent = 
+
+            document.getElementById('timerDisplay').textContent =
                 String(hours).padStart(2, '0') + ':' +
                 String(minutes).padStart(2, '0') + ':' +
                 String(seconds).padStart(2, '0');
@@ -218,7 +219,7 @@
             startTime = null;
             pausedTime = 0;
             isPaused = false;
-            
+
             document.getElementById('timerDisplay').textContent = '00:00:00';
             document.getElementById('timerStatus').textContent = 'Chưa bắt đầu';
             document.getElementById('startBtn').style.display = 'inline-block';
@@ -239,7 +240,14 @@
             }
         }
     </script>
-    <script src="/static/js/app.js"></script>
-    <script src="/static/js/tracking.js"></script>
+    <script src="/static/assets/js/login.js"></script>
+    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+    <script src="/static/assets/js/tracking.js"></script>
+    <script src="/static/assets/js/report.js"></script>
+    <script src="/static/assets/js/statistics.js"></script>
 </body>
+
 </html>

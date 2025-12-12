@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Report - Time Tracking</title>
+    <link rel="stylesheet" href="/static/assets/css/report.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>Time Tracking App</h1>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="projects.html">Projects & Tasks</a></li>
+                    <li><a href="tracking.html">Time Tracking</a></li>
+                    <li><a href="report.html">Daily Report</a></li>
+                    <li><a href="statistics.html">Statistics</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="mt-20">Daily Report</h2>
+
+        <div class="filter-section">
+            <div class="form-group">
+                <label for="reportDate">Chọn ngày:</label>
+                <input type="date" id="reportDate" name="reportDate">
+            </div>
+            <button class="btn btn-primary" id="filterBtn">Lọc</button>
+            <button class="btn btn-secondary" id="todayBtn">Hôm nay</button>
+        </div>
+
+        <div class="summary-section">
+            <h3>Tổng số giờ làm việc</h3>
+            <div class="total-hours" id="totalHours">8.5</div>
+            <p>giờ</p>
+        </div>
+
+        <div class="table-container">
+            <h3>Chi tiết thời gian làm việc</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thời gian bắt đầu</th>
+                        <th>Thời gian kết thúc</th>
+                        <th>Task</th>
+                        <th>Project</th>
+                        <th>Thời lượng (giờ)</th>
+                        <th>Ghi chú</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    <tr>
+                        <td>09:00:00</td>
+                        <td>11:30:00</td>
+                        <td>Task Demo 1</td>
+                        <td>Project Demo</td>
+                        <td>2.5</td>
+                        <td>Hoàn thành feature X</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="editEntry(1)">Sửa</button>
+                            <button class="btn btn-danger" onclick="deleteEntry(1)">Xóa</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>13:00:00</td>
+                        <td>15:30:00</td>
+                        <td>Task Demo 2</td>
+                        <td>Project Demo</td>
+                        <td>2.5</td>
+                        <td>Review code và fix bugs</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="editEntry(2)">Sửa</button>
+                            <button class="btn btn-danger" onclick="deleteEntry(2)">Xóa</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>15:45:00</td>
+                        <td>19:15:00</td>
+                        <td>Task Demo 3</td>
+                        <td>Project Demo</td>
+                        <td>3.5</td>
+                        <td>Meeting và lập kế hoạch</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="editEntry(3)">Sửa</button>
+                            <button class="btn btn-danger" onclick="deleteEntry(3)">Xóa</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card mt-20">
+            <h3>Tổng hợp theo Project</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Số task</th>
+                        <th>Tổng giờ</th>
+                        <th>% Tổng thời gian</th>
+                    </tr>
+                </thead>
+                <tbody id="projectSummaryBody">
+                    <tr>
+                        <td>Project Demo</td>
+                        <td>3</td>
+                        <td>8.5</td>
+                        <td>100%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card mt-20">
+            <h3>Export báo cáo</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" id="exportExcelBtn">Export Excel</button>
+                <button class="btn btn-primary" id="exportPdfBtn">Export PDF</button>
+                <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            console.log('Logout clicked');
+        });
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('reportDate').value = today;
+
+        document.getElementById('filterBtn').addEventListener('click', function () {
+            const selectedDate = document.getElementById('reportDate').value;
+            console.log('Filter by date:', selectedDate);
+            loadReportData(selectedDate);
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', function () {
+            document.getElementById('reportDate').value = today;
+            loadReportData(today);
+        });
+
+        function loadReportData(date) {
+            console.log('Loading report for:', date);
+        }
+
+        function updateTotalHours() {
+            let total = 8.5;
+            document.getElementById('totalHours').textContent = total.toFixed(1);
+        }
+
+        function editEntry(entryId) {
+            console.log('Edit entry:', entryId);
+        }
+
+        function deleteEntry(entryId) {
+            if (confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
+                console.log('Delete entry:', entryId);
+            }
+        }
+
+        document.getElementById('exportExcelBtn').addEventListener('click', function () {
+            console.log('Export to Excel');
+        });
+
+        document.getElementById('exportPdfBtn').addEventListener('click', function () {
+            console.log('Export to PDF');
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', function () {
+            console.log('Export to CSV');
+        });
+
+        loadReportData(today);
+    </script>
+    <script src="/static/assets/js/login.js"></script>
+    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+    <script src="/static/assets/js/tracking.js"></script>
+    <script src="/static/assets/js/report.js"></script>
+    <script src="/static/assets/js/statistics.js"></script>
+</body>
+
+</html>

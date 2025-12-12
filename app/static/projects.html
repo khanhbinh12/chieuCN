@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects & Tasks - Time Tracking</title>
+    <!-- CSS dùng chung cho toàn app -->
+    <link rel="stylesheet" href="/static/assets/css/projects.css">
+</head>
+
+<body>
+    <!-- HEADER & NAV giống dashboard -->
+    <header>
+        <div class="container">
+            <h1>Time Tracking App</h1>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="projects.html" class="active">Projects & Tasks</a></li>
+                    <li><a href="tracking.html">Time Tracking</a></li>
+                    <li><a href="report.html">Daily Report</a></li>
+                    <li><a href="statistics.html">Statistics</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 class="mt-20 mb-20">Projects & Tasks</h2>
+
+        <!-- Khu vực tạo Project mới -->
+        <div class="card mb-20">
+            <h3>Tạo Project mới</h3>
+            <form id="projectForm" class="mt-20">
+                <div class="form-group">
+                    <label for="projectName">Tên Project</label>
+                    <input type="text" id="projectName" name="projectName" placeholder="Nhập tên project" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="projectDescription">Mô tả</label>
+                    <textarea id="projectDescription" name="projectDescription"
+                        placeholder="Mô tả ngắn gọn về project"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Lưu Project
+                </button>
+            </form>
+        </div>
+
+        <!-- Danh sách Projects -->
+        <div class="list-container mb-20">
+            <h2>Danh sách Projects</h2>
+            <!-- projects.js sẽ render vào đây -->
+            <div id="projectList">
+                <p>Chưa có project nào. Hãy tạo project mới ở phía trên.</p>
+            </div>
+        </div>
+
+        <!-- Khu vực tạo Task mới -->
+        <div class="card mb-20">
+            <h3>Tạo Task mới</h3>
+            <form id="taskForm" class="mt-20">
+                <div class="form-group">
+                    <label for="taskProjectSelect">Thuộc Project</label>
+                    <!-- projects.js sẽ đổ options dựa trên Storage.getProjects() -->
+                    <select id="taskProjectSelect" required>
+                        <option value="">-- Chọn Project --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskName">Tên Task</label>
+                    <input type="text" id="taskName" name="taskName" placeholder="Nhập tên task" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Mô tả Task</label>
+                    <textarea id="taskDescription" name="taskDescription"
+                        placeholder="Mô tả ngắn gọn về task"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskEstimate">Thời gian ước lượng (giờ)</label>
+                    <input type="number" id="taskEstimate" name="taskEstimate" min="0" step="0.5"
+                        placeholder="Ví dụ: 2.5">
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Lưu Task
+                </button>
+            </form>
+        </div>
+
+        <!-- Danh sách Tasks -->
+        <div class="list-container mb-20">
+            <h2>Danh sách Tasks</h2>
+            <!-- projects.js sẽ render vào đây -->
+            <div id="taskList">
+                <p>Chưa có task nào. Hãy tạo task mới phía trên.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts: bắt buộc app.js trước, rồi mới tới projects.js -->
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+</body>
+
+</html>

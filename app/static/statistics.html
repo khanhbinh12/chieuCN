@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistics - Time Tracking</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/assets/css/statistics.css">
 </head>
 
 <body>
@@ -240,7 +240,6 @@
         document.getElementById('logoutBtn').addEventListener('click', function () {
             console.log('Logout clicked');
         });
-
         // Set ngày mặc định (tuần này)
         const today = new Date();
         const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
@@ -330,6 +329,14 @@
         // Load dữ liệu khi trang được tải
         loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
     </script>
+    <script src="/static/assets/js/login.js"></script>
+    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+    <script src="/static/assets/js/tracking.js"></script>
+    <script src="/static/assets/js/report.js"></script>
+    <script src="/static/assets/js/statistics.js"></script>
 </body>
 
 </html>

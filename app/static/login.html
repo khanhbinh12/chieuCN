@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Time Tracking</title>
-    <!-- Correct link to the styles.css -->
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="/static/assets/css/style.css">
 </head>
+
 <body>
     <div class="auth-container">
         <h2>Đăng nhập</h2>
+
         <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required placeholder="Nhập email của bạn">
+                <label for="username">Tên đăng nhập:</label>
+                <input type="text" id="username" name="username" required placeholder="Nhập tên đăng nhập của bạn">
             </div>
+
             <div class="form-group">
                 <label for="password">Mật khẩu:</label>
                 <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
             </div>
-            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+
+            <button type="submit" id="loginBtn" class="btn btn-primary">
+                Đăng nhập
+            </button>
         </form>
+
         <p class="text-center mt-20">
             Chưa có tài khoản? <a href="register.html" class="text-link">Đăng ký ngay</a>
         </p>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // TODO: Gọi API đăng nhập
-            console.log('Login:', email, password);
-            
-            // Giả lập lưu JWT vào localStorage
-            // localStorage.setItem('jwt_token', 'fake_token_here');
-            
-            // Chuyển đến dashboard
-            // window.location.href = 'dashboard.html';
-        });
-    </script>
-
-   <script src="static/js/app.js"></script>
-<script src="assets/js/login.js"></script>
-
+    <!-- Các script core (CONFIG / Utils / App) nếu bạn có -->
+    <!-- Nếu trước đây bạn có api.js thì có thể bỏ hoặc giữ, tùy bạn dùng -->
+    <!-- Quan trọng: app.js phải load TRƯỚC login.js để có window.TimeTrackingApp -->
+    <!-- ví dụ: -->
+    <!-- <script src="/static/assets/js/config.js"></script> -->
+    <!-- <script src="/static/assets/js/utils.js"></script> -->
+    <script src="/static/assets/js/login.js"></script>
+    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+    <script src="/static/assets/js/tracking.js"></script>
+    <script src="/static/assets/js/report.js"></script>
+    <script src="/static/assets/js/statistics.js"></script>
 </body>
+
 </html>

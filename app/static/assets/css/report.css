@@ -1,0 +1,374 @@
+/* =========================================
+   STANDARD TOKENS (đồng bộ toàn app)
+========================================= */
+:root {
+    --container-max: 1200px;
+    --container-pad: 24px;
+    --section-gap: 20px;
+
+    --card-pad: 20px;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    --border: 1px solid #e6e6e6;
+
+    --header-h: 64px;
+    --nav-gap: 16px;
+
+    --h2-size: 22px;
+
+    --btn-h: 40px;
+    --btn-pad-x: 16px;
+}
+
+/* =========================================
+   RESET & BASE
+========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* =========================================
+   LAYOUT CHUNG
+========================================= */
+.container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: var(--container-pad);
+}
+
+/* =========================================
+   HEADER + NAV + LOGOUT (đồng bộ)
+========================================= */
+header {
+    background-color: #2c3e50;
+    color: #fff;
+    min-height: var(--header-h);
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+header .container {
+    width: 100%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--nav-gap);
+}
+
+header h1 {
+    font-size: 22px;
+    white-space: nowrap;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+}
+
+nav a:hover {
+    background-color: #34495e;
+}
+
+nav a.active {
+    background-color: #3498db;
+}
+
+.logout-btn {
+    height: var(--btn-h);
+    padding: 0 var(--btn-pad-x);
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* =========================================
+   HEADINGS / UTILS
+========================================= */
+h2 {
+    font-size: var(--h2-size);
+    color: #2c3e50;
+    margin-top: var(--section-gap);
+    margin-bottom: 10px;
+}
+
+.mt-20 {
+    margin-top: var(--section-gap);
+}
+
+.mb-20 {
+    margin-bottom: var(--section-gap);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #7f8c8d;
+}
+
+/* =========================================
+   FORM / INPUTS
+========================================= */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+}
+
+/* =========================================
+   BUTTONS (đồng bộ)
+========================================= */
+.btn {
+    height: var(--btn-h);
+    padding: 0 var(--btn-pad-x);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.02s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    gap: 8px;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: #3498db;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* nút nhỏ trong table nếu muốn */
+.btn-sm {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* =========================================
+   FILTER SECTION (đồng bộ card)
+========================================= */
+.filter-section {
+    background: #fff;
+    padding: var(--card-pad);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: var(--border);
+
+    margin-top: var(--section-gap);
+    margin-bottom: var(--section-gap);
+
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-section .form-group {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 220px;
+}
+
+/* =========================================
+   TABLE CONTAINER (đồng bộ card)
+========================================= */
+.table-container {
+    background: #fff;
+    padding: var(--card-pad);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: var(--border);
+
+    margin-top: 10px;
+    overflow-x: auto;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+table th,
+table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+table th {
+    background: #34495e;
+    color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+table tr:hover {
+    background: #f0f0f0;
+}
+
+/* Cột actions */
+.report-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Nếu HTML chưa có class report-actions thì vẫn ổn,
+   nhưng bạn nên bọc nút trong <div class="report-actions">... */
+
+/* =========================================
+   ALERT (Utils.showAlert)
+========================================= */
+.alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* =========================================
+   RESPONSIVE (đồng bộ)
+========================================= */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    nav ul {
+        gap: 8px;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-section .form-group {
+        width: 100%;
+        min-width: unset;
+    }
+
+    table {
+        font-size: 13px;
+    }
+}

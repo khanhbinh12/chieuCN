@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/styles.css">
+    <!-- CSS riêng cho dashboard -->
+    <link rel="stylesheet" href="/static/assets/css/dashboard.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -24,15 +27,21 @@
     </header>
 
     <div class="container">
-        <h2 class="mt-20">Dashboard</h2>
-        
+        <!-- dòng chào user (tùy chọn, dashboard.js sẽ tự gắn nếu có data) -->
+        <h2 class="mt-20">
+            Dashboard
+            <span id="welcomeUser" style="font-size: 16px; color:#7f8c8d; margin-left: 10px;"></span>
+        </h2>
+
         <div class="dashboard-grid">
+            <!-- Card: tổng giờ hôm nay -->
             <div class="card">
                 <h3>Tổng giờ hôm nay</h3>
                 <div class="stat-value" id="totalHoursToday">0.0</div>
                 <div class="stat-label">giờ</div>
             </div>
 
+            <!-- Card: project đang active -->
             <div class="card">
                 <h3>Project đang active</h3>
                 <div id="activeProject">
@@ -40,6 +49,7 @@
                 </div>
             </div>
 
+            <!-- Card: task hiện tại -->
             <div class="card">
                 <h3>Task hiện tại</h3>
                 <div id="currentTask">
@@ -48,9 +58,10 @@
             </div>
         </div>
 
+        <!-- Quick actions -->
         <div class="card mt-20">
             <h3>Quick Actions</h3>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                 <button class="btn btn-success" onclick="window.location.href='tracking.html'">
                     Start Tracking
                 </button>
@@ -63,6 +74,7 @@
             </div>
         </div>
 
+        <!-- Hoạt động gần đây -->
         <div class="card mt-20">
             <h3>Hoạt động gần đây</h3>
             <div id="recentActivities">
@@ -71,13 +83,13 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            console.log('Logout clicked');
-        });
-    </script>
-    
-    <script src="static/assets/js/app.js"></script>
-    <script src="static/assets/js/dashboard.js"></script>
+    <!-- 
+        Quan trọng: app.js phải load TRƯỚC dashboard.js
+        để window.TimeTrackingApp đã được khởi tạo 
+    -->
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/login.js"></script>
 </body>
+
 </html>

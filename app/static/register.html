@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/styles.css">
+    <link rel="stylesheet" href="/static/assets/css/style.css">
 </head>
+
 <body>
     <div class="auth-container">
         <h2>Đăng ký tài khoản</h2>
@@ -24,7 +26,8 @@
             </div>
             <div class="form-group">
                 <label for="confirm_password">Xác nhận mật khẩu:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Nhập lại mật khẩu">
+                <input type="password" id="confirm_password" name="confirm_password" required
+                    placeholder="Nhập lại mật khẩu">
             </div>
             <button type="submit" class="btn btn-primary">Đăng ký</button>
         </form>
@@ -34,25 +37,31 @@
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const fullname = document.getElementById('fullname').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirm_password = document.getElementById('confirm_password').value;
-            
+
             if (password !== confirm_password) {
                 alert('Mật khẩu không khớp!');
                 return;
             }
-            
+
             // TODO: Gọi API đăng ký
             console.log('Register:', fullname, email, password);
         });
     </script>
-    <script src="/static/assets/js/app.js"></script>
-    <script src="/static/assets/js/api.js"></script>
+    <script src="/static/assets/js/login.js"></script>
     <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/app.js"></script>
+    <script src="/static/assets/js/dashboard.js"></script>
+    <script src="/static/assets/js/projects.js"></script>
+    <script src="/static/assets/js/tracking.js"></script>
+    <script src="/static/assets/js/report.js"></script>
+    <script src="/static/assets/js/statistics.js"></script>
 </body>
+
 </html>
