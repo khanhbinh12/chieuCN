@@ -1,295 +1,657 @@
-// app/static/assets/js/report.js
-
-document.addEventListener('DOMContentLoaded', () => {
-    const app = window.TimeTrackingApp || {};
-    const { CONFIG, Auth, Storage, Statistics, Export, Utils } = app;
-
-    // =========================
-    // 1. BẢO VỆ ROUTE: REPORT PAGE
-    // =========================
-    if (Utils && typeof Utils.requireAuth === 'function') {
-        if (!Utils.requireAuth()) return; // requireAuth sẽ tự redirect nếu chưa login
-    } else {
-        try {
-            let authenticated = false;
-
-            if (Utils && typeof Utils.isAuthenticated === 'function') {
-                authenticated = Utils.isAuthenticated();
-            } else if (Utils && typeof Utils.getToken === 'function') {
-                authenticated = !!Utils.getToken();
-            } else {
-                const token = localStorage.getItem('access_token');
-                authenticated = !!token;
-            }
-
-            if (!authenticated) {
-                window.location.href = 'login.html';
-                return;
-            }
-        } catch (e) {
-            console.warn('Không kiểm tra được token, fallback về login:', e);
-            window.location.href = 'login.html';
-            return;
-        }
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Report.js initializing...');
+    
+    // ============ ENVIRONMENT CHECK ============
+    if (typeof api === 'undefined') {
+        console.error("❌ Error: api.js not loaded");
+        alert("Lỗi: Chưa load api.js. Vui lòng kiểm tra lại!");
+        return;
     }
-
-    // =========================
-    // 2. NÚT ĐĂNG XUẤT
-    // =========================
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                if (Auth && typeof Auth.logout === 'function') {
-                    Auth.logout();
-                } else {
-                    // fallback nếu Auth chưa sẵn
-                    localStorage.removeItem(CONFIG?.STORAGE_KEYS?.TOKEN || 'access_token');
-                    localStorage.removeItem(CONFIG?.STORAGE_KEYS?.USER_DATA || 'tt_user_data');
-                    window.location.href = 'login.html';
-                }
-            }
-        });
-    }
-
-    // =========================
-    // 3. LẤY CÁC PHẦN TỬ DOM
-    // =========================
-    const filterBtn = document.getElementById('filterBtn');
-    const reportDateInput = document.getElementById('reportDate');
-    const reportTableBody = document.getElementById('reportTableBody');
-    const exportExcelBtn = document.getElementById('exportExcelBtn');
-    const exportPdfBtn = document.getElementById('exportPdfBtn');
-
-    let currentEntries = []; // entries hiện tại dùng để export
-
-    if (!Storage || !Export || !Utils) {
-        console.error('Thiếu Storage / Export / Utils trong TimeTrackingApp, không thể dùng trang Report.');
-        if (reportTableBody) {
-            reportTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align:center;color:#c0392b;">
-                        Lỗi cấu hình: không thể tải module cần thiết.
-                    </td>
-                    </tr>`;
-        }
+    
+    const token = api.getToken();
+    if (!token) {
+        console.warn('⚠️ No token found, redirecting to login...');
+        window.location.href = 'login.html';
         return;
     }
 
-    // =========================
-    // 4. HELPER
-    // =========================
-    function showAlert(message, type = 'success') {
-        if (Utils && typeof Utils.showAlert === 'function') {
-            Utils.showAlert(message, type);
-        } else {
-            alert(message);
+    console.log('✅ API loaded, token present');
+
+    if (typeof eventBus === 'undefined') {
+        console.warn('⚠️ EventBus not loaded - real-time sync disabled');
+    } else {
+        console.log('✅ EventBus loaded');
+    }
+
+    // --- DOM ELEMENTS ---
+    const dom = {
+        reportDate: document.getElementById('reportDate'),
+        filterBtn: document.getElementById('filterBtn'),
+        tableBody: document.getElementById('reportTableBody'),
+        totalHours: document.getElementById('totalHoursDay'),
+        exportBtn: document.getElementById('exportCsvBtn'),
+        logoutBtn: document.getElementById('logoutBtn')
+    };
+
+    // Validate DOM elements
+    const missingElements = Object.entries(dom)
+        .filter(([key, el]) => !el)
+        .map(([key]) => key);
+    
+    if (missingElements.length > 0) {
+        console.error('❌ Missing DOM elements:', missingElements);
+        alert(`Lỗi giao diện: Không tìm thấy ${missingElements.join(', ')}`);
+        return;
+    }
+
+    console.log('✅ All DOM elements found');
+
+    // State management
+    let allEntries = [];
+    let currentFilter = null;
+
+    // --- INITIALIZATION ---
+    initPage();
+    setupEventBusListeners();
+
+    function initPage() {
+        console.log('📋 Initializing page...');
+        
+        const today = getTodayDateString();
+        console.log('📅 Today date:', today);
+        
+        if (dom.reportDate) {
+            dom.reportDate.value = today;
+            currentFilter = today;
+            console.log('✅ Date input set to:', today);
         }
+
+        setupEventListeners();
+        loadData();
+    }
+
+    // ============ EVENTBUS INTEGRATION ============
+    
+    function setupEventBusListeners() {
+        if (typeof eventBus === 'undefined') {
+            console.warn('⚠️ EventBus not available, skipping listeners');
+            return;
+        }
+
+        console.log('📡 Setting up EventBus listeners for Report...');
+
+        // Listen to timer events (most important for report page)
+        eventBus.on(Events.TIMER_STOPPED, async (data, event) => {
+            console.log('🔔 Timer stopped event received:', data);
+            console.log('📌 Event source:', event.source);
+            
+            // Reload data to get the newly created entry
+            await loadData();
+            showNotification('✅ Đã cập nhật dữ liệu mới', 'success', 2000);
+        });
+
+        // Listen to entry events
+        eventBus.on(Events.ENTRY_CREATED, async (data, event) => {
+            if (event.source === 'current_tab') {
+                console.log('🔔 Entry created in current tab (skipping reload)');
+                return;
+            }
+            console.log('🔔 Entry created in another tab:', data);
+            await loadData();
+        });
+
+        eventBus.on(Events.ENTRY_UPDATED, async (data, event) => {
+            if (event.source === 'current_tab') return;
+            console.log('🔔 Entry updated in another tab:', data);
+            
+            // Update specific entry without full reload
+            const entry = allEntries.find(e => e.id === data.entryId);
+            if (entry && data.note !== undefined) {
+                entry.note = data.note;
+                renderTable();
+            }
+        });
+
+        eventBus.on(Events.ENTRY_DELETED, async (data, event) => {
+            if (event.source === 'current_tab') return;
+            console.log('🔔 Entry deleted in another tab:', data);
+            await loadData();
+        });
+
+        eventBus.on(Events.ENTRY_BULK_DELETED, async (data, event) => {
+            if (event.source === 'current_tab') return;
+            console.log('🔔 Bulk delete in another tab:', data);
+            await loadData();
+        });
+
+        console.log('✅ EventBus listeners registered for Report');
+    }
+
+    // --- UTILITY FUNCTIONS ---
+    
+    function getTodayDateString() {
+        const today = new Date();
+        return formatDateToYYYYMMDD(today);
+    }
+
+    function formatDateToYYYYMMDD(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getLocalDateFromISO(isoString) {
+        const date = new Date(isoString);
+        return formatDateToYYYYMMDD(date);
+    }
+
+    function formatDuration(seconds) {
+        if (!seconds || seconds === 0) return '0.00';
+        return (seconds / 3600).toFixed(2);
     }
 
     function formatTime(isoString) {
-        if (!isoString) return '';
-        const d = new Date(isoString);
-        if (Number.isNaN(d.getTime())) return '';
-        return d.toLocaleTimeString('vi-VN', {
+        return new Date(isoString).toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit'
+            hour12: false
         });
     }
 
-    // =========================
-    // 5. LOAD BÁO CÁO 1 NGÀY
-    // =========================
-    function loadReportData(date) {
-        if (!date) {
-            showAlert('Vui lòng chọn ngày báo cáo', 'error');
-            return;
+    // --- EVENT LISTENERS SETUP ---
+    
+    function setupEventListeners() {
+        console.log('🎯 Setting up event listeners...');
+        
+        if (dom.filterBtn) {
+            dom.filterBtn.addEventListener('click', handleFilterClick);
         }
 
-        const entries = Storage.getEntriesByDate(date) || [];
-        currentEntries = entries;
-        updateReportTable(entries);
-
-        // Nếu sau này bạn muốn show tổng giờ trong ngày ở đâu đó, thêm span id="totalHoursDay"
-        const totalHoursDayEl = document.getElementById('totalHoursDay');
-        if (totalHoursDayEl && Statistics && typeof Statistics.getTotalHoursByDate === 'function') {
-            const totalHours = Statistics.getTotalHoursByDate(date);
-            totalHoursDayEl.textContent = totalHours.toFixed(2);
-        }
-    }
-
-    // =========================
-    // 6. RENDER BẢNG BÁO CÁO
-    // =========================
-    function updateReportTable(entries) {
-        if (!reportTableBody) {
-            console.warn('Không tìm thấy tbody với id="reportTableBody"');
-            return;
+        if (dom.exportBtn) {
+            dom.exportBtn.addEventListener('click', handleExport);
         }
 
-        reportTableBody.innerHTML = '';
-
-        if (!entries || entries.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="7" style="text-align:center;">Không có bản ghi nào trong ngày</td>`;
-            reportTableBody.appendChild(row);
-            return;
+        if (dom.logoutBtn) {
+            dom.logoutBtn.addEventListener('click', handleLogout);
         }
 
-        const tasks = Storage.getTasks();
-        const projects = Storage.getProjects();
-
-        entries.forEach((entry) => {
-            const row = document.createElement('tr');
-
-            const task = tasks.find((t) => t.id === entry.taskId);
-            const project = projects.find((p) => p.id === entry.projectId);
-
-            const taskName = task ? task.name : 'Unknown task';
-            const projectName = project ? project.name : 'Unknown project';
-
-            const durationHours =
-                typeof entry.durationHours === 'number'
-                    ? entry.durationHours.toFixed(2)
-                    : Utils.msToHours(entry.duration || 0);
-
-            row.innerHTML = `
-                <td>${formatTime(entry.startTime)}</td>
-                <td>${formatTime(entry.endTime)}</td>
-                <td>${taskName}</td>
-                <td>${projectName}</td>
-                <td>${durationHours}</td>
-                <td>${entry.note || ''}</td>
-                <td>
-                    <button class="btn btn-warning" onclick="editEntry('${entry.id}')">Sửa</button>
-                    <button class="btn btn-danger" onclick="deleteEntry('${entry.id}')">Xóa</button>
-                </td>
-            `;
-
-            reportTableBody.appendChild(row);
-        });
-    }
-
-    // =========================
-    // 7. SỬA ENTRY (DEMO: SỬA NOTE)
-    // =========================
-    function handleEditEntry(entryId) {
-        const entries = Storage.getTrackingEntries();
-        const entry = entries.find((e) => e.id === entryId);
-        if (!entry) {
-            alert('Không tìm thấy bản ghi');
-            return;
-        }
-
-        const newNote = prompt('Cập nhật ghi chú cho bản ghi này:', entry.note || '');
-        if (newNote === null) return; // user bấm Cancel
-
-        const updated = Storage.updateTrackingEntry(entryId, { note: newNote });
-        if (updated) {
-            showAlert('Đã cập nhật ghi chú!', 'success');
-            const date = reportDateInput.value || Utils.formatDate(new Date());
-            loadReportData(date);
-        } else {
-            alert('Cập nhật thất bại');
-        }
-    }
-
-    // =========================
-    // 8. XOÁ ENTRY
-    // =========================
-    function handleDeleteEntry(entryId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
-            return;
-        }
-        Storage.deleteTrackingEntry(entryId);
-        showAlert('Đã xóa bản ghi!', 'success');
-
-        const date = reportDateInput.value || Utils.formatDate(new Date());
-        loadReportData(date);
-    }
-
-    // Gắn ra window để dùng onclick="editEntry(...)" / "deleteEntry(...)" trong HTML
-    window.editEntry = handleEditEntry;
-    window.deleteEntry = handleDeleteEntry;
-
-    // =========================
-    // 9. NÚT LỌC THEO NGÀY
-    // =========================
-    if (filterBtn) {
-        filterBtn.addEventListener('click', () => {
-            const selectedDate =
-                (reportDateInput && reportDateInput.value) || Utils.formatDate(new Date());
-            loadReportData(selectedDate);
-        });
-    }
-
-    // =========================
-    // 10. EXPORT EXCEL (CSV)
-    // =========================
-    if (exportExcelBtn) {
-        exportExcelBtn.addEventListener('click', () => {
-            if (!currentEntries || currentEntries.length === 0) {
-                alert('Không có dữ liệu để export');
-                return;
-            }
-
-            const tasks = Storage.getTasks();
-            const projects = Storage.getProjects();
-
-            const exportData = currentEntries.map((entry) => {
-                const task = tasks.find((t) => t.id === entry.taskId);
-                const project = projects.find((p) => p.id === entry.projectId);
-
-                return {
-                    date: entry.date,
-                    startTime: formatTime(entry.startTime),
-                    endTime: formatTime(entry.endTime),
-                    taskName: task ? task.name : 'Unknown task',
-                    projectName: project ? project.name : 'Unknown project',
-                    durationHours:
-                        typeof entry.durationHours === 'number'
-                            ? entry.durationHours.toFixed(2)
-                            : Utils.msToHours(entry.duration || 0),
-                    note: entry.note || ''
-                };
+        if (dom.reportDate) {
+            dom.reportDate.addEventListener('change', () => {
+                currentFilter = dom.reportDate.value;
+                console.log('📅 Date changed to:', currentFilter);
+                renderTable();
             });
+        }
 
-            const date = reportDateInput.value || Utils.formatDate(new Date());
-            const filename = `time-report-${date}.csv`;
-
-            Export.toCSV(exportData, filename);
-            showAlert('Đã export báo cáo ra CSV!', 'success');
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                handleExport();
+            }
         });
+
+        console.log('✅ Event listeners setup complete');
     }
 
-    // =========================
-    // 11. EXPORT PDF (TẠM = JSON)
-    // =========================
-    if (exportPdfBtn) {
-        exportPdfBtn.addEventListener('click', () => {
-            if (!currentEntries || currentEntries.length === 0) {
-                alert('Không có dữ liệu để export');
+    // --- EVENT HANDLERS ---
+    
+    function handleFilterClick() {
+        currentFilter = dom.reportDate.value;
+        console.log('🔍 Filter button clicked, date:', currentFilter);
+        showLoadingState();
+        
+        setTimeout(() => {
+            renderTable();
+        }, 200);
+    }
+
+    function handleLogout() {
+        if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+            api.logout();
+        }
+    }
+
+    async function handleExport() {
+        try {
+            const date = dom.reportDate.value;
+            const dataToExport = filterEntriesByDate(date);
+            
+            if (dataToExport.length === 0) {
+                showNotification('Không có dữ liệu để xuất file cho ngày này', 'warning');
                 return;
             }
+            
+            exportToCSV(dataToExport, date);
+            showNotification('Đã xuất file CSV thành công!', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showNotification('Lỗi khi xuất file: ' + error.message, 'error');
+        }
+    }
 
-            const date = reportDateInput.value || Utils.formatDate(new Date());
-            const filename = `time-report-${date}.json`;
+    // --- CORE FUNCTIONS ---
 
-            Export.toJSON(currentEntries, filename);
-            showAlert('Đã export dữ liệu gốc ra JSON (giả lập PDF).', 'success');
+    async function loadData() {
+        showLoadingState();
+        
+        try {
+            console.log('🔄 Loading report data...');
+            console.log('📡 API endpoint: /time-entries/?limit=200');
+            
+            // ✅ Load with higher limit to ensure we get enough data
+            const response = await api.request('/time-entries/?limit=200');
+            
+            console.log('📥 Raw API response:', response);
+            console.log('📦 Response type:', Array.isArray(response) ? 'Array' : 'Object');
+            
+            // ✅ Handle both array and paginated response
+            if (Array.isArray(response)) {
+                allEntries = response;
+                console.log('✅ Response is array, using directly');
+            } else if (response && response.data && Array.isArray(response.data)) {
+                allEntries = response.data;
+                console.log('✅ Response is paginated object, using .data property');
+                console.log('📊 Pagination info:', {
+                    total: response.total,
+                    page: response.page,
+                    has_next: response.has_next
+                });
+            } else {
+                console.warn('⚠️ Unknown response format:', response);
+                allEntries = [];
+            }
+            
+            console.log(`✅ Loaded ${allEntries.length} entries`);
+            
+            // Debug: Log first few entries
+            if (allEntries.length > 0) {
+                console.log('📝 First entry sample:', allEntries[0]);
+                console.log('📝 First entry start_time:', allEntries[0].start_time);
+                console.log('📝 First entry end_time:', allEntries[0].end_time);
+                console.log('📝 First entry duration:', allEntries[0].duration);
+            }
+            
+            // Sort by start_time descending (newest first)
+            allEntries.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+            
+            console.log('✅ Entries sorted by start_time');
+            
+            renderTable();
+            
+        } catch (error) {
+            console.error('❌ Load data error:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+            showErrorState(`Lỗi kết nối: ${error.message}`);
+        }
+    }
+
+    function filterEntriesByDate(dateStr) {
+        if (!allEntries || allEntries.length === 0) {
+            console.log('⚠️ No entries to filter');
+            return [];
+        }
+        
+        console.log(`🔍 Filtering ${allEntries.length} entries for date: ${dateStr}`);
+        console.log('📅 Filter date (YYYY-MM-DD):', dateStr);
+        
+        const filtered = allEntries.filter((entry, index) => {
+            const entryDate = getLocalDateFromISO(entry.start_time);
+            const match = entryDate === dateStr;
+            
+            // Debug log for each entry
+            if (index < 5) { // Log first 5 entries
+                console.log(`Entry ${index}:`, {
+                    id: entry.id,
+                    start_time: entry.start_time,
+                    parsed_date: entryDate,
+                    filter_date: dateStr,
+                    match: match
+                });
+            }
+            
+            if (match) {
+                console.log(`✓ Match found: Entry #${entry.id} - ${entry.start_time} -> ${entryDate}`);
+            }
+            
+            return match;
+        });
+        
+        console.log(`✅ Found ${filtered.length} entries for ${dateStr}`);
+        
+        if (filtered.length === 0) {
+            console.warn('⚠️ No entries match the selected date!');
+            console.warn('💡 This could be due to:');
+            console.warn('   1. No entries exist for this date');
+            console.warn('   2. Timezone mismatch between server and client');
+            console.warn('   3. Date format parsing issue');
+            
+            // Show some sample dates from entries
+            if (allEntries.length > 0) {
+                const sampleDates = allEntries.slice(0, 5).map(e => ({
+                    id: e.id,
+                    start_time: e.start_time,
+                    local_date: getLocalDateFromISO(e.start_time)
+                }));
+                console.log('📅 Sample entry dates:', sampleDates);
+            }
+        }
+        
+        return filtered;
+    }
+
+    function calculateTotalDuration(entries) {
+        return entries.reduce((total, entry) => {
+            return total + (entry.duration || 0);
+        }, 0);
+    }
+
+    function renderTable() {
+        const selectedDate = dom.reportDate.value;
+        const filtered = filterEntriesByDate(selectedDate);
+
+        console.log(`📊 Rendering table for ${selectedDate}: ${filtered.length} entries`);
+
+        if (filtered.length === 0) {
+            showEmptyState(selectedDate);
+            updateTotalHours(0);
+            return;
+        }
+
+        const totalSeconds = calculateTotalDuration(filtered);
+
+        dom.tableBody.innerHTML = filtered.map(entry => createTableRow(entry)).join('');
+
+        attachActionListeners();
+
+        updateTotalHours(totalSeconds);
+        
+        console.log('✅ Table rendered successfully');
+    }
+
+    function createTableRow(entry) {
+        const startTime = formatTime(entry.start_time);
+        const isRunning = !entry.end_time;
+        
+        let endTime, durationDisplay;
+        
+        if (isRunning) {
+            endTime = '<span style="color:#27ae60; font-weight:bold"><i class="fa-solid fa-circle-play"></i> Đang chạy</span>';
+            durationDisplay = '<span style="color:#999">--</span>';
+        } else {
+            endTime = formatTime(entry.end_time);
+            durationDisplay = formatDuration(entry.duration) + ' h';
+        }
+
+        const note = entry.note || '<span style="color:#ccc; font-style:italic">Không có ghi chú</span>';
+
+        return `
+            <tr data-entry-id="${entry.id}">
+                <td style="text-align:center; font-weight:bold; color:#7f8c8d;">#${entry.task_id || entry.id}</td>
+                <td>${startTime}</td>
+                <td>${endTime}</td>
+                <td style="font-weight:600; color:#2c3e50;">${durationDisplay}</td>
+                <td style="max-width: 250px;">
+                    <div class="note-content" title="${escapeHtml(entry.note || '')}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${note}
+                    </div>
+                </td>
+                <td style="text-align:center;">
+                    <button class="action-btn btn-edit" data-action="edit" data-id="${entry.id}" title="Sửa ghi chú">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="action-btn btn-delete" data-action="delete" data-id="${entry.id}" title="Xóa bản ghi">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function attachActionListeners() {
+        const actionButtons = dom.tableBody.querySelectorAll('.action-btn');
+        
+        actionButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const action = button.dataset.action;
+                const entryId = parseInt(button.dataset.id);
+                
+                if (action === 'edit') {
+                    await handleEditNote(entryId);
+                } else if (action === 'delete') {
+                    await handleDeleteEntry(entryId);
+                }
+            });
         });
     }
 
-    // =========================
-    // 12. KHỞI TẠO: MẶC ĐỊNH HÔM NAY
-    // =========================
-    const today = Utils.formatDate(new Date());
-    if (reportDateInput && !reportDateInput.value) {
-        reportDateInput.value = today;
-    }
-    loadReportData(reportDateInput ? reportDateInput.value : today);
+    async function handleEditNote(entryId) {
+        const entry = allEntries.find(e => e.id === entryId);
+        if (!entry) return;
 
-    console.log('Report page initialized');
+        const currentNote = entry.note || '';
+        const newNote = prompt("📝 Cập nhật ghi chú công việc:", currentNote);
+        
+        if (newNote === null) return;
+        
+        const oldNote = entry.note;
+        entry.note = newNote;
+        renderTable();
+
+        try {
+            await api.request(`/time-entries/${entryId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ note: newNote })
+            });
+            
+            // ✅ Broadcast update event
+            if (typeof eventBus !== 'undefined') {
+                eventBus.emit(Events.ENTRY_UPDATED, { 
+                    entryId: entryId,
+                    note: newNote 
+                });
+            }
+            
+            showNotification('Đã cập nhật ghi chú', 'success');
+            
+        } catch (error) {
+            entry.note = oldNote;
+            renderTable();
+            
+            console.error('Update note error:', error);
+            showNotification('Lỗi cập nhật: ' + error.message, 'error');
+        }
+    }
+
+    async function handleDeleteEntry(entryId) {
+        if (!confirm("⚠️ Cảnh báo:\nBạn có chắc chắn muốn xóa bản ghi thời gian này không?")) {
+            return;
+        }
+
+        const entryIndex = allEntries.findIndex(e => e.id === entryId);
+        if (entryIndex === -1) return;
+
+        const deletedEntry = allEntries.splice(entryIndex, 1)[0];
+        renderTable();
+
+        try {
+            await api.request(`/time-entries/${entryId}`, {
+                method: 'DELETE'
+            });
+            
+            // ✅ Broadcast delete event
+            if (typeof eventBus !== 'undefined') {
+                eventBus.emit(Events.ENTRY_DELETED, { entryId: entryId });
+            }
+            
+            showNotification('Đã xóa bản ghi', 'success');
+            
+        } catch (error) {
+            allEntries.splice(entryIndex, 0, deletedEntry);
+            renderTable();
+            
+            console.error('Delete error:', error);
+            showNotification('Lỗi khi xóa: ' + error.message, 'error');
+        }
+    }
+
+    function exportToCSV(dataToExport, date) {
+        let csvContent = "\uFEFF";
+        
+        csvContent += "BÁO CÁO THỜI GIAN LÀM VIỆC\n";
+        csvContent += `Ngày: ${formatDateDisplay(date)}\n`;
+        csvContent += `Xuất lúc: ${new Date().toLocaleString('vi-VN')}\n\n`;
+        
+        csvContent += "ID,Bắt đầu,Kết thúc,Thời lượng (Giờ),Ghi chú\n";
+        
+        dataToExport.forEach(entry => {
+            const start = formatTime(entry.start_time);
+            const end = entry.end_time ? formatTime(entry.end_time) : 'Đang chạy';
+            const duration = formatDuration(entry.duration);
+            const note = (entry.note || '')
+                .replace(/"/g, '""')
+                .replace(/\n/g, ' ');
+            
+            csvContent += `${entry.task_id || entry.id},"${start}","${end}",${duration},"${note}"\n`;
+        });
+        
+        const totalSeconds = calculateTotalDuration(dataToExport);
+        const totalHours = formatDuration(totalSeconds);
+        csvContent += `\nTÓM TẮT\n`;
+        csvContent += `Tổng số bản ghi,${dataToExport.length}\n`;
+        csvContent += `Tổng thời gian,${totalHours} giờ\n`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", `TimeTracking_Report_${date}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+    }
+
+    function formatDateDisplay(dateStr) {
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('vi-VN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    function updateTotalHours(totalSeconds) {
+        const hours = formatDuration(totalSeconds);
+        dom.totalHours.innerHTML = `${hours} <small>giờ</small>`;
+    }
+
+    // --- UI STATE FUNCTIONS ---
+    
+    function showLoadingState() {
+        dom.tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                    <div style="margin-top: 10px;">Đang tải dữ liệu...</div>
+                </td>
+            </tr>`;
+        updateTotalHours(0);
+    }
+
+    function showEmptyState(date) {
+        dom.tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center; padding: 40px; color: #999;">
+                    <i class="fa-regular fa-folder-open fa-2x" style="margin-bottom:10px; display:block"></i>
+                    Không có dữ liệu làm việc trong ngày <strong>${formatDateDisplay(date)}</strong>
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: #bbb;">
+                        💡 Kiểm tra Console (F12) để xem log debug
+                    </div>
+                </td>
+            </tr>`;
+    }
+
+    function showErrorState(message) {
+        dom.tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center; color:#e74c3c; padding: 40px;">
+                    <i class="fa-solid fa-triangle-exclamation fa-2x" style="margin-bottom:10px; display:block;"></i>
+                    ${message}
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            <i class="fa-solid fa-rotate-right"></i> Thử lại
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        updateTotalHours(0);
+    }
+
+    function showNotification(message, type = 'info', duration = 3000) {
+        const colors = {
+            success: '#27ae60',
+            error: '#e74c3c',
+            warning: '#f39c12',
+            info: '#3498db'
+        };
+
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${colors[type]};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+            font-weight: 500;
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    console.log('✅ Report.js initialization complete');
 });
+
+console.log('✅ Report.js with EventBus loaded');
+console.log('📡 EventBus:', typeof eventBus !== 'undefined' ? 'Available ✓' : 'Not loaded');

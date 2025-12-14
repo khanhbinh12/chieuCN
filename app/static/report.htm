@@ -1,195 +1,685 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Report - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/report.css">
-</head>
+    <title>Báo cáo chi tiết - Time Tracking</title>
+    
+    <link rel="stylesheet" href="/static/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<body>
-    <header>
-        <div class="container">
-            <h1>Time Tracking App</h1>
-            <nav>
-                <ul>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="projects.html">Projects & Tasks</a></li>
-                    <li><a href="tracking.html">Time Tracking</a></li>
-                    <li><a href="report.html">Daily Report</a></li>
-                    <li><a href="statistics.html">Statistics</a></li>
-                </ul>
-            </nav>
-            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
-        </div>
-    </header>
-
-    <div class="container">
-        <h2 class="mt-20">Daily Report</h2>
-
-        <div class="filter-section">
-            <div class="form-group">
-                <label for="reportDate">Chọn ngày:</label>
-                <input type="date" id="reportDate" name="reportDate">
-            </div>
-            <button class="btn btn-primary" id="filterBtn">Lọc</button>
-            <button class="btn btn-secondary" id="todayBtn">Hôm nay</button>
-        </div>
-
-        <div class="summary-section">
-            <h3>Tổng số giờ làm việc</h3>
-            <div class="total-hours" id="totalHours">8.5</div>
-            <p>giờ</p>
-        </div>
-
-        <div class="table-container">
-            <h3>Chi tiết thời gian làm việc</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Thời gian bắt đầu</th>
-                        <th>Thời gian kết thúc</th>
-                        <th>Task</th>
-                        <th>Project</th>
-                        <th>Thời lượng (giờ)</th>
-                        <th>Ghi chú</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody id="reportTableBody">
-                    <tr>
-                        <td>09:00:00</td>
-                        <td>11:30:00</td>
-                        <td>Task Demo 1</td>
-                        <td>Project Demo</td>
-                        <td>2.5</td>
-                        <td>Hoàn thành feature X</td>
-                        <td>
-                            <button class="btn btn-warning" onclick="editEntry(1)">Sửa</button>
-                            <button class="btn btn-danger" onclick="deleteEntry(1)">Xóa</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>13:00:00</td>
-                        <td>15:30:00</td>
-                        <td>Task Demo 2</td>
-                        <td>Project Demo</td>
-                        <td>2.5</td>
-                        <td>Review code và fix bugs</td>
-                        <td>
-                            <button class="btn btn-warning" onclick="editEntry(2)">Sửa</button>
-                            <button class="btn btn-danger" onclick="deleteEntry(2)">Xóa</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>15:45:00</td>
-                        <td>19:15:00</td>
-                        <td>Task Demo 3</td>
-                        <td>Project Demo</td>
-                        <td>3.5</td>
-                        <td>Meeting và lập kế hoạch</td>
-                        <td>
-                            <button class="btn btn-warning" onclick="editEntry(3)">Sửa</button>
-                            <button class="btn btn-danger" onclick="deleteEntry(3)">Xóa</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card mt-20">
-            <h3>Tổng hợp theo Project</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Project</th>
-                        <th>Số task</th>
-                        <th>Tổng giờ</th>
-                        <th>% Tổng thời gian</th>
-                    </tr>
-                </thead>
-                <tbody id="projectSummaryBody">
-                    <tr>
-                        <td>Project Demo</td>
-                        <td>3</td>
-                        <td>8.5</td>
-                        <td>100%</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card mt-20">
-            <h3>Export báo cáo</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-success" id="exportExcelBtn">Export Excel</button>
-                <button class="btn btn-primary" id="exportPdfBtn">Export PDF</button>
-                <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function () {
-            console.log('Logout clicked');
-        });
-
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('reportDate').value = today;
-
-        document.getElementById('filterBtn').addEventListener('click', function () {
-            const selectedDate = document.getElementById('reportDate').value;
-            console.log('Filter by date:', selectedDate);
-            loadReportData(selectedDate);
-        });
-
-        document.getElementById('todayBtn').addEventListener('click', function () {
-            document.getElementById('reportDate').value = today;
-            loadReportData(today);
-        });
-
-        function loadReportData(date) {
-            console.log('Loading report for:', date);
+    <style>
+        /* === REPORT PAGE STYLES - PRODUCTION VERSION === */
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-purple: rgba(118, 75, 162, 0.3);
+            --text-muted: #888;
+            --border-color: #eee;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
         }
 
-        function updateTotalHours() {
-            let total = 8.5;
-            document.getElementById('totalHours').textContent = total.toFixed(1);
+        /* === TOOLBAR === */
+        .toolbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            flex: 1;
+            min-width: 280px;
         }
 
-        function editEntry(entryId) {
-            console.log('Edit entry:', entryId);
+        .date-input-wrapper {
+            flex: 1;
+            max-width: 280px;
         }
 
-        function deleteEntry(entryId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
-                console.log('Delete entry:', entryId);
+        .date-input-wrapper label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* === SUMMARY CARD === */
+        .summary-card {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px var(--shadow-purple);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px var(--shadow-purple);
+        }
+        
+        /* Decorative icon background */
+        .summary-card::after {
+            content: '\f017';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: -20px;
+            bottom: -30px;
+            font-size: 10rem;
+            opacity: 0.1;
+            color: #fff;
+            transform: rotate(-15deg);
+            pointer-events: none;
+        }
+
+        .summary-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .summary-card h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            border: none;
+            padding: 0;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .total-hours {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-top: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .total-hours small {
+            font-size: 1.5rem;
+            font-weight: 400;
+            opacity: 0.85;
+        }
+
+        .summary-subtitle {
+            opacity: 0.85;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        /* === TABLE === */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: white;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        thead th {
+            background: linear-gradient(180deg, #f8f9fa 0%, #f1f3f5 100%);
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 16px 15px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        thead th i {
+            margin-right: 5px;
+            color: #764ba2;
+        }
+        
+        tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+            box-shadow: inset 0 0 0 1px #e9ecef;
+        }
+
+        /* Note column styling */
+        .note-content {
+            line-height: 1.4;
+            color: #555;
+            cursor: help;
+        }
+
+        /* === ACTION BUTTONS === */
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:last-child {
+            margin-right: 0;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-edit {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-edit:hover:not(:disabled) {
+            background-color: #ffeaa7;
+        }
+        
+        .btn-delete {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-delete:hover:not(:disabled) {
+            background-color: #f5c6cb;
+        }
+
+        /* === STATUS INDICATORS === */
+        .status-running {
+            color: var(--success-color);
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-running i {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* === PAGINATION === */
+        .pagination-info {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background: #f8f9fa;
+        }
+
+        .pagination-info .btn {
+            margin-left: 10px;
+        }
+
+        /* === EMPTY/LOADING STATES === */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+            display: block;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .loading-state i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* === INFO CARDS === */
+        .info-card {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-card kbd {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* === STATS BAR === */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-item i {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: #f0f4f8;
+            color: #667eea;
+        }
+
+        .stat-item .stat-label {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 768px) {
+            .toolbar-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .date-input-wrapper {
+                max-width: 100%;
+            }
+
+            .summary-card {
+                padding: 20px;
+            }
+
+            .summary-card::after {
+                font-size: 6rem;
+                right: -10px;
+                bottom: -20px;
+            }
+
+            .total-hours {
+                font-size: 2.5rem;
+            }
+
+            .total-hours small {
+                font-size: 1.2rem;
+            }
+
+            .table-responsive {
+                border-left: none;
+                border-right: none;
+                border-radius: 0;
+                max-height: none;
+            }
+
+            tbody td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                margin-right: 4px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
             }
         }
 
-        document.getElementById('exportExcelBtn').addEventListener('click', function () {
-            console.log('Export to Excel');
-        });
+        /* === PRINT STYLES === */
+        @media print {
+            .toolbar-container,
+            .action-btn,
+            header,
+            .logout-btn,
+            .info-card,
+            .pagination-info {
+                display: none !important;
+            }
 
-        document.getElementById('exportPdfBtn').addEventListener('click', function () {
-            console.log('Export to PDF');
-        });
+            .summary-card {
+                background: white !important;
+                color: black !important;
+                border: 2px solid #764ba2;
+                box-shadow: none !important;
+            }
 
-        document.getElementById('exportCsvBtn').addEventListener('click', function () {
-            console.log('Export to CSV');
-        });
+            .summary-card::after {
+                display: none;
+            }
 
-        loadReportData(today);
-    </script>
-    <script src="/static/assets/js/login.js"></script>
-    <script src="/static/assets/js/register.js"></script>
+            tbody tr:hover {
+                background-color: transparent !important;
+            }
+
+            .table-responsive {
+                border: none;
+                max-height: none;
+                overflow: visible;
+            }
+        }
+
+        /* === ACCESSIBILITY === */
+        .action-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* === SMOOTH ANIMATIONS === */
+        .table-responsive {
+            scroll-behavior: smooth;
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+        /* === NAVIGATION ACTIVE STATE === */
+        nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        /* === SKELETON LOADING === */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-clock fa-lg"></i>
+                <h1 style="margin: 0;">Time Tracker</h1>
+            </div>
+            <nav>
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                <a href="projects.html">
+                    <i class="fa-solid fa-list-check"></i> Projects
+                </a>
+                <a href="tracking.html">
+                    <i class="fa-solid fa-stopwatch"></i> Tracking
+                </a>
+                <a href="report.html" class="active">
+                    <i class="fa-solid fa-chart-pie"></i> Report
+                </a>
+                <a href="statistics.html">
+                    <i class="fa-solid fa-chart-line"></i> Statistics
+                </a>
+            </nav>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="mt-20 mb-20">
+            <i class="fa-solid fa-file-lines"></i> Báo cáo chi tiết
+        </h2>
+        
+        <!-- Toolbar: Filter & Export -->
+        <div class="card">
+            <div class="toolbar-container">
+                <div class="filter-group">
+                    <div class="date-input-wrapper">
+                        <label for="reportDate">
+                            <i class="fa-regular fa-calendar"></i> Chọn ngày xem:
+                        </label>
+                        <input type="date" 
+                               id="reportDate" 
+                               class="form-control"
+                               aria-label="Chọn ngày báo cáo"
+                               title="Chọn ngày để xem báo cáo">
+                    </div>
+                    <button id="filterBtn" class="btn btn-primary" title="Lọc dữ liệu theo ngày đã chọn">
+                        <i class="fa-solid fa-filter"></i> Xem dữ liệu
+                    </button>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button id="exportCsvBtn" 
+                            class="btn btn-success"
+                            title="Xuất báo cáo ra file CSV (Ctrl+E)">
+                        <i class="fa-solid fa-file-csv"></i> Xuất CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="summary-card">
+            <div class="summary-content">
+                <h3>
+                    <i class="fa-solid fa-business-time"></i> Tổng thời gian làm việc
+                </h3>
+                <div class="total-hours" id="totalHoursDay">
+                    0.00 <small>giờ</small>
+                </div>
+                <div class="summary-subtitle">
+                    Dữ liệu được tính toán dựa trên ngày đã chọn
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 80px; text-align: center;">
+                                <i class="fa-solid fa-hashtag"></i> ID
+                            </th>
+                            <th style="width: 120px;">
+                                <i class="fa-regular fa-clock"></i> Bắt đầu
+                            </th>
+                            <th style="width: 120px;">
+                                <i class="fa-solid fa-clock"></i> Kết thúc
+                            </th>
+                            <th style="width: 130px;">
+                                <i class="fa-solid fa-hourglass-half"></i> Thời lượng
+                            </th>
+                            <th>
+                                <i class="fa-regular fa-note-sticky"></i> Ghi chú
+                            </th>
+                            <th style="width: 120px; text-align: center;">
+                                <i class="fa-solid fa-wrench"></i> Thao tác
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr>
+                            <td colspan="6" class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <div style="margin-top: 10px;">Đang tải dữ liệu...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination Info -->
+            <div class="pagination-info" id="paginationInfo" style="display: none;">
+                <span>
+                    Trang <strong><span id="currentPage">1</span></strong> / 
+                    <strong><span id="totalPages">1</span></strong>
+                </span>
+                <button id="loadMoreBtn" 
+                        class="btn btn-sm btn-outline-primary" 
+                        style="display: none;">
+                    <i class="fa-solid fa-arrow-down"></i> Tải thêm
+                </button>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="info-card">
+            <p>
+                <i class="fa-solid fa-circle-info"></i> 
+                <strong>Mẹo sử dụng:</strong>
+            </p>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                <li>Nhấn <kbd>Ctrl+E</kbd> để xuất báo cáo CSV nhanh chóng</li>
+                <li>Nhấn <kbd>Ctrl+R</kbd> để làm mới dữ liệu</li>
+                <li>Click vào icon bút chì để chỉnh sửa ghi chú</li>
+                <li>Dữ liệu được cập nhật theo thời gian thực từ server</li>
+            </ul>
+        </div>
+
+        <!-- Version Info -->
+        <div style="text-align: center; margin-top: 30px; padding: 20px; color: #999; font-size: 0.85rem;">
+            <p style="margin: 0;">
+                <i class="fa-solid fa-code"></i> Time Tracking Report v6.0 | 
+                <i class="fa-solid fa-clock"></i> <span id="lastUpdate">--</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/assets/js/api.js"></script>
     <script src="/static/assets/js/app.js"></script>
-    <script src="/static/assets/js/dashboard.js"></script>
-    <script src="/static/assets/js/projects.js"></script>
-    <script src="/static/assets/js/tracking.js"></script>
     <script src="/static/assets/js/report.js"></script>
-    <script src="/static/assets/js/statistics.js"></script>
+    <script src="/static/assets/js/event-bus.js"></script>
+    
+    <script>
+        // Update last refresh time
+        function updateLastRefreshTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('vi-VN');
+            const dateStr = now.toLocaleDateString('vi-VN');
+            document.getElementById('lastUpdate').textContent = `Cập nhật lúc ${timeStr} - ${dateStr}`;
+        }
+        
+        // Update on page load
+        window.addEventListener('load', updateLastRefreshTime);
+        
+        // Update every minute
+        setInterval(updateLastRefreshTime, 60000);
+    </script>
 </body>
-
 </html>

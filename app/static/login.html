@@ -1,52 +1,215 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/style.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Nền Gradient động */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
 
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* LOGIN CARD */
+        .auth-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            backdrop-filter: blur(10px); /* Hiệu ứng kính mờ nếu nền trong suốt */
+        }
+
+        .logo-area {
+            margin-bottom: 30px;
+        }
+        .logo-area i {
+            font-size: 3rem;
+            background: -webkit-linear-gradient(#23a6d5, #23d5ab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-area h2 {
+            margin-top: 10px;
+            color: #333;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+        .logo-area p {
+            color: #777;
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        /* FORM STYLES */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #444;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            transition: color 0.3s;
+        }
+
+        /* Hiệu ứng khi focus vào ô nhập */
+        .input-group input:focus {
+            border-color: #23a6d5;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(35, 166, 213, 0.1);
+        }
+        .input-group input:focus + i {
+            color: #23a6d5;
+        }
+
+        /* BUTTON */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #23a6d5, #23d5ab);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(35, 213, 171, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* FOOTER LINKS */
+        .auth-footer {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .auth-footer a {
+            color: #23a6d5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ERROR MESSAGE */
+        #errorMessage {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border: 1px solid #ffcdd2;
+            display: none;
+            text-align: left;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 480px) {
+            .auth-wrapper {
+                padding: 30px 20px;
+                width: 90%;
+            }
+        }
+    </style>
+</head>
 <body>
-    <div class="auth-container">
-        <h2>Đăng nhập</h2>
+
+    <div class="auth-wrapper">
+        <div class="logo-area">
+            <i class="fa-solid fa-hourglass-start"></i>
+            <h2>Time Tracker</h2>
+            <p>Đăng nhập để quản lý thời gian</p>
+        </div>
 
         <form id="loginForm">
+            <div id="errorMessage"><i class="fa-solid fa-circle-exclamation"></i> <span>Thông báo lỗi</span></div>
+
             <div class="form-group">
-                <label for="username">Tên đăng nhập:</label>
-                <input type="text" id="username" name="username" required placeholder="Nhập tên đăng nhập của bạn">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" required placeholder="vidu@gmail.com">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="password">Mật khẩu:</label>
-                <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
+                <label for="password">Mật khẩu</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" required placeholder="••••••••">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
             </div>
 
-            <button type="submit" id="loginBtn" class="btn btn-primary">
-                Đăng nhập
+            <button type="submit" id="loginBtn" class="btn-primary">
+                Đăng nhập ngay
             </button>
         </form>
 
-        <p class="text-center mt-20">
-            Chưa có tài khoản? <a href="register.html" class="text-link">Đăng ký ngay</a>
-        </p>
+        <div class="auth-footer">
+            Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+        </div>
     </div>
 
-    <!-- Các script core (CONFIG / Utils / App) nếu bạn có -->
-    <!-- Nếu trước đây bạn có api.js thì có thể bỏ hoặc giữ, tùy bạn dùng -->
-    <!-- Quan trọng: app.js phải load TRƯỚC login.js để có window.TimeTrackingApp -->
-    <!-- ví dụ: -->
-    <!-- <script src="/static/assets/js/config.js"></script> -->
-    <!-- <script src="/static/assets/js/utils.js"></script> -->
-    <script src="/static/assets/js/login.js"></script>
-    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/api.js"></script>
     <script src="/static/assets/js/app.js"></script>
-    <script src="/static/assets/js/dashboard.js"></script>
-    <script src="/static/assets/js/projects.js"></script>
-    <script src="/static/assets/js/tracking.js"></script>
-    <script src="/static/assets/js/report.js"></script>
-    <script src="/static/assets/js/statistics.js"></script>
+    <script src="/static/assets/js/login.js"></script>
 </body>
-
 </html>

@@ -1,44 +1,220 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/style.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- COPY TỪ LOGIN (Để đồng bộ) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Nền Gradient động giống Login */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            padding: 20px; /* Thêm padding cho mobile */
+        }
 
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* CARD ĐĂNG KÝ */
+        .auth-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px; /* Rộng hơn Login một chút do nhiều trường hơn */
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area {
+            margin-bottom: 25px;
+        }
+        .logo-area i {
+            font-size: 2.5rem;
+            background: -webkit-linear-gradient(#e73c7e, #ee7752); /* Màu khác một chút so với login để phân biệt */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-area h2 {
+            margin-top: 10px;
+            color: #333;
+            font-weight: 700;
+            font-size: 1.6rem;
+        }
+
+        /* FORM STYLES */
+        .form-group {
+            margin-bottom: 15px; /* Giảm margin để card gọn hơn */
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #444;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        /* Hiệu ứng focus */
+        .input-group input:focus {
+            border-color: #e73c7e; /* Màu hồng/cam chủ đạo cho trang này */
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(231, 60, 126, 0.1);
+        }
+        .input-group input:focus + i {
+            color: #e73c7e;
+        }
+
+        /* BUTTON */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #e73c7e, #ee7752);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 60, 126, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* FOOTER LINKS */
+        .auth-footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .auth-footer a {
+            color: #e73c7e;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ERROR MESSAGE - Dùng chung style */
+        #errorMessage {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            border: 1px solid #ffcdd2;
+            display: none; /* Mặc định ẩn, JS sẽ hiện */
+            text-align: left;
+        }
+    </style>
+</head>
 <body>
-    <div class="auth-container">
-        <h2>Đăng ký tài khoản</h2>
+
+    <div class="auth-wrapper">
+        <div class="logo-area">
+            <i class="fa-solid fa-user-plus"></i>
+            <h2>Tạo tài khoản mới</h2>
+            <p style="color: #777; font-size: 0.9rem;">Tham gia cùng chúng tôi để quản lý thời gian tốt hơn</p>
+        </div>
+
         <form id="registerForm">
+            <div id="errorMessage"><i class="fa-solid fa-circle-exclamation"></i> <span id="errorText"></span></div>
+
             <div class="form-group">
-                <label for="fullname">Họ và tên:</label>
-                <input type="text" id="fullname" name="fullname" required placeholder="Nhập họ và tên">
+                <label for="fullname">Họ và tên</label>
+                <div class="input-group">
+                    <input type="text" id="fullname" name="fullname" required placeholder="Ví dụ: Nguyễn Văn A">
+                    <i class="fa-solid fa-user"></i>
+                </div>
             </div>
+            
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required placeholder="Nhập email">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" required placeholder="vidu@gmail.com">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
             </div>
+
             <div class="form-group">
-                <label for="password">Mật khẩu:</label>
-                <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
+                <label for="password">Mật khẩu</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" required placeholder="•••••••• (Tối thiểu 6 ký tự)">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
             </div>
+            
             <div class="form-group">
-                <label for="confirm_password">Xác nhận mật khẩu:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required
-                    placeholder="Nhập lại mật khẩu">
+                <label for="confirm_password">Xác nhận mật khẩu</label>
+                <div class="input-group">
+                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="Nhập lại mật khẩu trên">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Đăng ký</button>
+
+            <button type="submit" class="btn-primary">
+                Đăng ký tài khoản
+            </button>
         </form>
-        <p class="text-center mt-20">
-            Đã có tài khoản? <a href="/login" class="text-link">Đăng nhập</a>
-        </p>
+
+        <div class="auth-footer">
+            Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a>
+        </div>
     </div>
 
-    <script src="/static/assets/js/register.js"></script>
+    <script src="/static/assets/js/api.js"></script>
     <script src="/static/assets/js/app.js"></script>
-
+    <script src="/static/assets/js/register.js"></script>
 </body>
-
 </html>

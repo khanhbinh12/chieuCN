@@ -3,28 +3,30 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 
-# Định nghĩa các trạng thái của Task
 class TaskStatus(str, Enum):
     TODO = "todo"
     IN_PROGRESS = "in_progress"
     DONE = "done"
 
-# Class cơ bản (Chứa các trường chung)
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
-    project_id: int
     status: Optional[TaskStatus] = TaskStatus.TODO
 
-# Class dùng khi tạo Task (Router đang tìm class này)
 class TaskCreate(TaskBase):
-    pass
+    project_id: int
 
-# Class dùng khi trả về dữ liệu (có thêm id, time...)
+# --- QUAN TRỌNG: Class này dùng cho hàm update_task ---
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[TaskStatus] = None 
+# -----------------------------------------------------
+
 class TaskResponse(TaskBase):
     id: int
-    total_time: int  # Tổng thời gian đã làm (giây)
-    created_at: datetime
-    
+    project_id: int
+    created_at: datetime = datetime.now() # Hoặc lấy từ DB
+
     class Config:
         from_attributes = True

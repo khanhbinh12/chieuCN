@@ -1,342 +1,598 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistics - Time Tracking</title>
-    <link rel="stylesheet" href="/static/assets/css/statistics.css">
-</head>
+    <title>Thống kê - Time Tracking Pro</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js - Latest stable version -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        /* ========== MODERN STATS CARDS ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px 26px;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        .stat-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12); 
+        }
+        
+        .stat-icon-bg {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 7rem;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+            transition: all 0.4s ease;
+        }
+        
+        .stat-card:hover .stat-icon-bg {
+            transform: rotate(-20deg) scale(1.15);
+            opacity: 0.08;
+        }
+        
+        .stat-label { 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            color: #7f8c8d; 
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value { 
+            font-size: 3rem; 
+            font-weight: 900; 
+            color: #2c3e50; 
+            margin: 10px 0;
+            line-height: 1;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .stat-description {
+            font-size: 0.82rem;
+            color: #95a5a6;
+            margin-top: 10px;
+            font-weight: 500;
+        }
 
+        /* Card color themes */
+        .card-blue .stat-value { color: #3498db; }
+        .card-blue .stat-icon-bg { color: #3498db; }
+        
+        .card-green .stat-value { color: #27ae60; }
+        .card-green .stat-icon-bg { color: #27ae60; }
+        
+        .card-orange .stat-value { color: #e67e22; }
+        .card-orange .stat-icon-bg { color: #e67e22; }
+        
+        .card-purple .stat-value { color: #9b59b6; }
+        .card-purple .stat-icon-bg { color: #9b59b6; }
+
+        /* ========== MODERN FILTER TOOLBAR ========== */
+        .filter-toolbar {
+            display: flex;
+            align-items: flex-end;
+            gap: 18px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 28px;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        .date-input-group {
+            flex: 0 0 auto;
+        }
+        
+        .date-input-group label { 
+            font-weight: 800; 
+            font-size: 0.75rem; 
+            color: #2c3e50; 
+            margin-bottom: 10px; 
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .date-input-group i { 
+            margin-right: 8px; 
+            color: #3498db;
+        }
+        
+        .date-input-group input[type="date"] {
+            padding: 12px 16px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            min-width: 170px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .date-input-group input[type="date"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+            outline: none;
+            background: white;
+        }
+        
+        .filter-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* ========== MODERN BUTTONS ========== */
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-secondary {
+            background: white;
+            color: #7f8c8d;
+            border: 2px solid #ecf0f1;
+            padding: 9px 20px;
+            font-size: 0.82rem;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        /* ========== PROGRESS BAR ========== */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-text { 
+            font-size: 0.95rem; 
+            font-weight: 800; 
+            color: #2c3e50; 
+            min-width: 55px; 
+            text-align: right; 
+        }
+
+        /* ========== CHART CONTAINER ========== */
+        .chart-placeholder {
+            min-height: 320px;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #f0f0f0;
+        }
+
+        /* ========== TABLE IMPROVEMENTS ========== */
+        .table-container {
+            box-shadow: none;
+            border: none;
+            padding: 0;
+        }
+        
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        table thead tr {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+        }
+        
+        table thead th {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            color: #2c3e50;
+            padding: 18px 22px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        table tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        table tbody td {
+            padding: 20px 22px;
+            vertical-align: middle;
+        }
+
+        /* ========== CARDS LAYOUT ========== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 32px;
+            align-items: start;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .card h3 i {
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+
+        /* ========== PAGE HEADER ========== */
+        .page-header {
+            margin: 35px 0 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .page-header h2 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            letter-spacing: -1px;
+        }
+        
+        .page-header h2 i {
+            color: #3498db;
+            font-size: 2rem;
+        }
+        
+        .page-header p {
+            margin: 12px 0 0 60px;
+            color: #7f8c8d;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+            
+            .filter-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+            
+            .date-input-group {
+                width: 100%;
+            }
+            
+            .date-input-group input[type="date"] {
+                width: 100%;
+            }
+            
+            .filter-actions {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 2.4rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .page-header p {
+                margin-left: 0;
+            }
+        }
+
+        /* ========== UTILITIES ========== */
+        .text-center { text-align: center; }
+        .text-muted { color: #95a5a6; }
+    </style>
+</head>
 <body>
+    
+    <!-- ========== HEADER ========== -->
     <header>
         <div class="container">
-            <h1>Time Tracking App</h1>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <i class="fa-solid fa-clock fa-lg" style="color: #3498db;"></i>
+                <h1 style="margin: 0; font-weight: 900; letter-spacing: -0.5px;">Time Tracker</h1>
+            </div>
             <nav>
-                <ul>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="projects.html">Projects & Tasks</a></li>
-                    <li><a href="tracking.html">Time Tracking</a></li>
-                    <li><a href="report.html">Daily Report</a></li>
-                    <li><a href="statistics.html">Statistics</a></li>
-                </ul>
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                <a href="projects.html">
+                    <i class="fa-solid fa-list-check"></i> Projects
+                </a>
+                <a href="tracking.html">
+                    <i class="fa-solid fa-stopwatch"></i> Tracking
+                </a>
+                <a href="report.html">
+                    <i class="fa-solid fa-chart-pie"></i> Report
+                </a>
+                <a href="statistics.html" class="active">
+                    <i class="fa-solid fa-chart-line"></i> Statistics
+                </a>
             </nav>
-            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </button>
         </div>
     </header>
 
+    <!-- ========== MAIN CONTENT ========== -->
     <div class="container">
-        <h2 class="mt-20">Statistics</h2>
-
-        <!-- Filter khoảng thời gian -->
-        <div class="filter-section">
-            <div class="form-group">
-                <label for="startDate">Từ ngày:</label>
-                <input type="date" id="startDate" name="startDate">
-            </div>
-            <div class="form-group">
-                <label for="endDate">Đến ngày:</label>
-                <input type="date" id="endDate" name="endDate">
-            </div>
-            <button class="btn btn-primary" id="filterBtn">Lọc</button>
-            <button class="btn btn-secondary" id="thisWeekBtn">Tuần này</button>
-            <button class="btn btn-secondary" id="thisMonthBtn">Tháng này</button>
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>
+                <i class="fa-solid fa-chart-line"></i>
+                Phân tích hiệu suất
+            </h2>
+            <p>
+                Theo dõi và đánh giá thời gian làm việc theo dự án
+            </p>
         </div>
 
-        <!-- Tổng quan -->
+        <!-- Filter Toolbar -->
+        <div class="filter-toolbar">
+            <div class="date-input-group">
+                <label>
+                    <i class="fa-regular fa-calendar"></i> Từ ngày
+                </label>
+                <input type="date" id="startDate" class="form-control" required>
+            </div>
+            
+            <div class="date-input-group">
+                <label>
+                    <i class="fa-regular fa-calendar-check"></i> Đến ngày
+                </label>
+                <input type="date" id="endDate" class="form-control" required>
+            </div>
+            
+            <button id="filterBtn" class="btn btn-primary">
+                <i class="fa-solid fa-filter"></i> Lọc dữ liệu
+            </button>
+            
+            <div class="filter-actions">
+                <button id="thisWeekBtn" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-calendar-week"></i> Tuần này
+                </button>
+                <button id="thisMonthBtn" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-calendar-days"></i> Tháng này
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card card-blue">
+                <i class="fa-solid fa-hourglass-half stat-icon-bg"></i>
+                <div class="stat-label">Tổng giờ làm</div>
+                <div class="stat-value" id="totalHours">0.0</div>
+                <div class="stat-description">Trong khoảng đã chọn</div>
+            </div>
+            
+            <div class="stat-card card-green">
+                <i class="fa-solid fa-calendar-day stat-icon-bg"></i>
+                <div class="stat-label">Ngày làm việc</div>
+                <div class="stat-value" id="workingDays">0</div>
+                <div class="stat-description">Số ngày có hoạt động</div>
+            </div>
+            
+            <div class="stat-card card-orange">
+                <i class="fa-solid fa-folder-open stat-icon-bg"></i>
+                <div class="stat-label">Dự án tham gia</div>
+                <div class="stat-value" id="totalProjects">0</div>
+                <div class="stat-description">Dự án khác nhau</div>
+            </div>
+            
+            <div class="stat-card card-purple">
+                <i class="fa-solid fa-check-double stat-icon-bg"></i>
+                <div class="stat-label">Phiên tracking</div>
+                <div class="stat-value" id="totalTasks">0</div>
+                <div class="stat-description">Số phiên bấm giờ</div>
+            </div>
+        </div>
+
+        <!-- Charts & Table Grid -->
         <div class="dashboard-grid">
+            
+            <!-- Chart Card -->
             <div class="card">
-                <h3>Tổng giờ làm việc</h3>
-                <div class="stat-value" id="totalHours">42.5</div>
-                <div class="stat-label">giờ</div>
-            </div>
-
-            <div class="card">
-                <h3>Số ngày làm việc</h3>
-                <div class="stat-value" id="workingDays">5</div>
-                <div class="stat-label">ngày</div>
-            </div>
-
-            <div class="card">
-                <h3>Trung bình mỗi ngày</h3>
-                <div class="stat-value" id="avgPerDay">8.5</div>
-                <div class="stat-label">giờ/ngày</div>
-            </div>
-
-            <div class="card">
-                <h3>Số Projects</h3>
-                <div class="stat-value" id="totalProjects">3</div>
-                <div class="stat-label">projects</div>
-            </div>
-        </div>
-
-        <!-- Bảng tổng giờ theo project -->
-        <div class="table-container">
-            <h3>Thống kê theo Project</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Project</th>
-                        <th>Số Tasks</th>
-                        <th>Tổng giờ</th>
-                        <th>% Tổng thời gian</th>
-                        <th>Trung bình/Task</th>
-                    </tr>
-                </thead>
-                <tbody id="projectStatsBody">
-                    <!-- Dữ liệu sẽ được load động ở đây -->
-                    <tr>
-                        <td>Project Demo 1</td>
-                        <td>5</td>
-                        <td>20.0</td>
-                        <td>47%</td>
-                        <td>4.0</td>
-                    </tr>
-                    <tr>
-                        <td>Project Demo 2</td>
-                        <td>8</td>
-                        <td>15.5</td>
-                        <td>36%</td>
-                        <td>1.9</td>
-                    </tr>
-                    <tr>
-                        <td>Project Demo 3</td>
-                        <td>3</td>
-                        <td>7.0</td>
-                        <td>17%</td>
-                        <td>2.3</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr style="font-weight: bold; background-color: #ecf0f1;">
-                        <td>Tổng cộng</td>
-                        <td>16</td>
-                        <td>42.5</td>
-                        <td>100%</td>
-                        <td>2.7</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <!-- Thống kê theo ngày -->
-        <div class="table-container">
-            <h3>Thống kê theo ngày</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ngày</th>
-                        <th>Thứ</th>
-                        <th>Số Tasks</th>
-                        <th>Tổng giờ</th>
-                        <th>Projects</th>
-                    </tr>
-                </thead>
-                <tbody id="dailyStatsBody">
-                    <!-- Dữ liệu sẽ được load động ở đây -->
-                    <tr>
-                        <td>11/12/2024</td>
-                        <td>Thứ 2</td>
-                        <td>3</td>
-                        <td>8.5</td>
-                        <td>Project Demo 1, Project Demo 2</td>
-                    </tr>
-                    <tr>
-                        <td>10/12/2024</td>
-                        <td>Thứ 3</td>
-                        <td>4</td>
-                        <td>9.0</td>
-                        <td>Project Demo 1, Project Demo 3</td>
-                    </tr>
-                    <tr>
-                        <td>09/12/2024</td>
-                        <td>Thứ 4</td>
-                        <td>3</td>
-                        <td>7.5</td>
-                        <td>Project Demo 2</td>
-                    </tr>
-                    <tr>
-                        <td>08/12/2024</td>
-                        <td>Thứ 5</td>
-                        <td>3</td>
-                        <td>8.0</td>
-                        <td>Project Demo 1, Project Demo 2</td>
-                    </tr>
-                    <tr>
-                        <td>07/12/2024</td>
-                        <td>Thứ 6</td>
-                        <td>3</td>
-                        <td>9.5</td>
-                        <td>Project Demo 2, Project Demo 3</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Chart placeholder (nâng cao) -->
-        <div class="card mt-20">
-            <h3>Biểu đồ thống kê (Nâng cao)</h3>
-            <div style="text-align: center; padding: 40px; background-color: #ecf0f1; border-radius: 4px;">
-                <p style="color: #7f8c8d;">Vị trí để vẽ chart theo tuần/tháng</p>
-                <p style="color: #7f8c8d; font-size: 12px;">Có thể dùng Chart.js, D3.js hoặc thư viện khác</p>
-                <div id="chartContainer" style="min-height: 300px; margin-top: 20px;">
-                    <!-- Chart sẽ được render ở đây -->
-                    <canvas id="statsChart"></canvas>
+                <h3>
+                    <i class="fa-solid fa-chart-simple"></i> 
+                    Top 5 dự án
+                </h3>
+                <div class="chart-placeholder">
+                    <div style="text-align: center; color: #cbd5e0;">
+                        <i class="fa-solid fa-chart-bar fa-4x" style="margin-bottom: 20px; opacity: 0.25;"></i>
+                        <p style="margin: 0; font-size: 1.05rem; font-weight: 600; color: #a0aec0;">
+                            Chọn khoảng thời gian để xem biểu đồ
+                        </p>
+                        <small style="color: #cbd5e0; margin-top: 8px; display: block;">
+                            Biểu đồ sẽ hiển thị sau khi lọc dữ liệu
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Top Tasks -->
-        <div class="card mt-20">
-            <h3>Top 10 Tasks tốn nhiều thời gian nhất</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Task</th>
-                        <th>Project</th>
-                        <th>Tổng giờ</th>
-                        <th>Số lần tracking</th>
-                    </tr>
-                </thead>
-                <tbody id="topTasksBody">
-                    <tr>
-                        <td>1</td>
-                        <td>Task Demo A</td>
-                        <td>Project Demo 1</td>
-                        <td>12.5</td>
-                        <td>8</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Task Demo B</td>
-                        <td>Project Demo 2</td>
-                        <td>10.0</td>
-                        <td>6</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Task Demo C</td>
-                        <td>Project Demo 1</td>
-                        <td>8.5</td>
-                        <td>5</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Export -->
-        <div class="card mt-20">
-            <h3>Export thống kê</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-success" id="exportExcelBtn">Export Excel</button>
-                <button class="btn btn-primary" id="exportPdfBtn">Export PDF</button>
+            <!-- Table Card -->
+            <div class="card">
+                <h3>
+                    <i class="fa-solid fa-table"></i> 
+                    Phân bổ theo dự án
+                </h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Dự án</th>
+                                <th style="text-align: right;">Tổng giờ</th>
+                                <th style="width: 38%;">Tỷ trọng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectStatsBody">
+                            <tr>
+                                <td colspan="3" class="text-center" style="padding: 50px;">
+                                    <i class="fa-solid fa-circle-info fa-3x" 
+                                       style="color: #3498db; margin-bottom: 18px; display: block; opacity: 0.7;"></i>
+                                    <span style="color: #7f8c8d; font-size: 1.05rem; font-weight: 600;">
+                                        Chọn khoảng thời gian để xem thống kê chi tiết
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
         </div>
+
     </div>
 
-    <script>
-        // Xử lý đăng xuất
-        document.getElementById('logoutBtn').addEventListener('click', function () {
-            console.log('Logout clicked');
-        });
-        // Set ngày mặc định (tuần này)
-        const today = new Date();
-        const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
-        const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-
-        document.getElementById('startDate').value = firstDayOfWeek.toISOString().split('T')[0];
-        document.getElementById('endDate').value = lastDayOfWeek.toISOString().split('T')[0];
-
-        // Xử lý filter
-        document.getElementById('filterBtn').addEventListener('click', function () {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            if (!startDate || !endDate) {
-                alert('Vui lòng chọn đầy đủ khoảng thời gian!');
-                return;
-            }
-
-            if (new Date(startDate) > new Date(endDate)) {
-                alert('Ngày bắt đầu phải nhỏ hơn ngày kết thúc!');
-                return;
-            }
-
-            // TODO: Gọi API load dữ liệu
-            console.log('Filter from', startDate, 'to', endDate);
-            loadStatistics(startDate, endDate);
-        });
-
-        // Nút tuần này
-        document.getElementById('thisWeekBtn').addEventListener('click', function () {
-            const today = new Date();
-            const firstDay = new Date(today.setDate(today.getDate() - today.getDay() + 1));
-            const lastDay = new Date(today.setDate(today.getDate() - today.getDay() + 7));
-
-            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
-
-            loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
-        });
-
-        // Nút tháng này
-        document.getElementById('thisMonthBtn').addEventListener('click', function () {
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
-
-            loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
-        });
-
-        // Load thống kê
-        function loadStatistics(startDate, endDate) {
-            // TODO: Gọi API load dữ liệu thống kê
-            console.log('Loading statistics from', startDate, 'to', endDate);
-
-            // Giả lập update UI
-            // updateOverview();
-            // updateProjectStats();
-            // updateDailyStats();
-            // updateChart();
-            // updateTopTasks();
-        }
-
-        // Export Excel
-        document.getElementById('exportExcelBtn').addEventListener('click', function () {
-            // TODO: Implement export to Excel
-            console.log('Export statistics to Excel');
-        });
-
-        // Export PDF
-        document.getElementById('exportPdfBtn').addEventListener('click', function () {
-            // TODO: Implement export to PDF
-            console.log('Export statistics to PDF');
-        });
-
-        // Vẽ chart (nâng cao - có thể dùng Chart.js)
-        function drawChart() {
-            // TODO: Implement chart drawing
-            // Ví dụ với Chart.js:
-            // const ctx = document.getElementById('statsChart').getContext('2d');
-            // const chart = new Chart(ctx, {...});
-            console.log('Drawing chart...');
-        }
-
-        // Load dữ liệu khi trang được tải
-        loadStatistics(document.getElementById('startDate').value, document.getElementById('endDate').value);
-    </script>
-    <script src="/static/assets/js/login.js"></script>
-    <script src="/static/assets/js/register.js"></script>
+    <!-- ========== SCRIPTS ========== -->
+    <!-- Core API -->
+    <script src="/static/assets/js/api.js"></script>
+    
+    <!-- Utils (Optional but recommended) -->
     <script src="/static/assets/js/app.js"></script>
-    <script src="/static/assets/js/dashboard.js"></script>
-    <script src="/static/assets/js/projects.js"></script>
-    <script src="/static/assets/js/tracking.js"></script>
-    <script src="/static/assets/js/report.js"></script>
+    
+    <!-- Statistics Logic -->
     <script src="/static/assets/js/statistics.js"></script>
-</body>
 
+    <script src="/static/assets/js/event-bus.js"></script>
+    
+</body>
 </html>
