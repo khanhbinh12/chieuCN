@@ -107,8 +107,8 @@ async def tracking_page():
 
 @app.get("/report.html", response_class=HTMLResponse)
 async def report_page():
-    # HTML: app/static/report.html
-    return get_html_file("report.html")
+    # HTML: app/static/report.htm
+    return get_html_file("report.htm")
 
 
 @app.get("/statistics.html", response_class=HTMLResponse)
