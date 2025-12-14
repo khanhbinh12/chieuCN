@@ -50,7 +50,7 @@ def serialize_entry_with_utc(entry, include_task_info=False, db=None):
             if project:
                 result["project_id"] = project.id
                 result["project_name"] = project.name
-                result["project_color"] = project.color
+                result["project_color"] = getattr(project, 'color', None)
     
     return result
 
@@ -112,7 +112,7 @@ def start_timer(
     
     # Verify user has access to this task
     project = db.query(Project).filter(Project.id == task.project_id).first()
-    if not project or project.user_id != current_user.id:
+    if not project or project.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Không có quyền truy cập task này")
 
     # Auto-stop running timer
