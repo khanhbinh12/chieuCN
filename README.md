@@ -1,4 +1,4 @@
-<img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/db542e82-ec31-4afe-b18b-02a8c69ed405" />1. Giới thiệu dự án
+1. Giới thiệu dự án
 Time Tracking App là một ứng dụng web mã nguồn mở được xây dựng nhằm hỗ trợ người dùng theo dõi thời gian làm việc trên các công việc (tasks) khác nhau. Hệ thống cho phép người dùng tạo công việc, bắt đầu/dừng bộ đếm thời gian (timer), ghi nhận thời gian làm việc và xem báo cáo tổng hợp theo ngày.
 Dự án được thực hiện trong khuôn khổ học phần Phát triển ứng dụng mã nguồn mở tại Trường Đại học Bình Dương, với mục tiêu áp dụng các kiến thức về FastAPI, ORM, cơ sở dữ liệu và quy trình phát triển phần mềm mã nguồn mở.
 7. Demo hệ thống
