@@ -29,12 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // FIX LỖI 404: Gọi qua api.register sẽ dùng đúng URL /auth/register
-            await api.register({
-                email: email,
-                username: email,    // Map email sang username
-                password: password,
-                full_name: fullname
-            });
+            await api.register(email, password, email, fullname);
 
             alert("Đăng ký thành công! Hãy đăng nhập.");
             window.location.href = "login.html";

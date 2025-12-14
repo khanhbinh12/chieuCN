@@ -36,8 +36,11 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    # Lấy thông tin người dùng từ database bằng username
+    # Lấy thông tin người dùng từ database bằng username hoặc email
     user = user_repo.get_by_username(db, username=form_data.username)
+    if not user:
+        # Nếu không tìm thấy bằng username, thử tìm bằng email
+        user = user_repo.get_by_email(db, email=form_data.username)
 
     # Kiểm tra thông tin người dùng và mật khẩu
     if not user or not verify_password(form_data.password, user.password_hash):

@@ -9,6 +9,10 @@ class UserRepository:
         """Lấy người dùng từ cơ sở dữ liệu theo tên người dùng"""
         return db.query(User).filter(User.username == username).first()
 
+    def get_by_email(self, db: Session, email: str):
+        """Lấy người dùng từ cơ sở dữ liệu theo email"""
+        return db.query(User).filter(User.email == email).first()
+
     def create_user(self, db: Session, user_data: dict):
         """
         Tạo người dùng mới.

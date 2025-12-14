@@ -6,6 +6,10 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, projects, tasks, time_entries
+from app.database.connection import engine, Base
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 # =========================
 # CẤU HÌNH ĐƯỜNG DẪN
